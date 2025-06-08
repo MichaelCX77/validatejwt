@@ -20,9 +20,9 @@ public class ValidatejwtApplication {
      */
     public static void main(String[] args) {
         try {
-            log.info("Inicializando a aplicação ValidateJWT.");
+            log.debug("Inicializando a aplicação ValidateJWT.");
             SpringApplication.run(ValidatejwtApplication.class, args);
-            log.info("Aplicação iniciada com sucesso.");
+            log.debug("Aplicação iniciada com sucesso.");
         } catch (Exception ex) {
             // Registro estruturado de falha crítica com traceback
             log.error("Falha crítica ao iniciar a aplicação: {}", ex.getMessage(), ex);
