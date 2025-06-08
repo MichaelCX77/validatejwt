@@ -30,23 +30,31 @@ public class JwtService {
 
 	}
 
+	private static final ObjectMapper objectMapper = new ObjectMapper();
+	
 	private Claims getClaims(Jwt jwt) {
+	    try {
+	        String[] parts = jwt.getJwtToken().split("\\.");
+	        if (parts.length != 3) {
+	            throw new IllegalArgumentException();
+	        }
 
-		try {
-			String[] parts = jwt.getJwtToken().split("\\.");
-			if (parts.length != 3)
-				throw new IllegalArgumentException("JWT malformado");
+	        String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
+	        return objectMapper.readValue(payloadJson, Claims.class);
 
-			String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
-			
-			return new ObjectMapper().readValue(payloadJson, Claims.class);
-		} catch (UnrecognizedPropertyException e) {
-			throw new ClientException(HttpStatus.BAD_REQUEST, "Claims permitidos:" + Arrays.toString(ReflectionUtils.getFieldNames(Claims.class)));
-		} catch(JsonParseException e) {
-			throw new ClientException(HttpStatus.BAD_REQUEST, "JWT Inválido");
-		} catch (Exception e) {
-			throw new RuntimeException("Erro ao desconhecido: Procure a equipe de suporte", e);
-		}
+	    } catch (UnrecognizedPropertyException e) {
+	        String allowedFields = Arrays.toString(getFieldNames(Claims.class));
+	        throw new ClientException(HttpStatus.BAD_REQUEST, "Claims inválidos. Campos permitidos: " + allowedFields);
+
+	    } catch (JsonParseException | IllegalArgumentException e) {
+	        throw new ClientException(HttpStatus.BAD_REQUEST, "JWT inválido");
+	    } catch (Exception e) {
+	        throw new RuntimeException("Erro desconhecido: procure a equipe de suporte.", e);
+	    }
+	}
+	
+	private String[] getFieldNames(Class<?> clazz) {
+	    return ReflectionUtils.getFieldNames(clazz);
 	}
 
 }
