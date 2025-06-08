@@ -17,5 +17,6 @@ public class JwtDTO implements Serializable{
 
 	public JwtDTO (Boolean isValid) {
 		this.isValid =  isValid;
+		this.message = "Validado com sucesso";
 	}
 }

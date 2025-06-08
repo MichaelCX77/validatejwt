@@ -3,7 +3,6 @@ package com.api.validatejwt.v1.config;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;

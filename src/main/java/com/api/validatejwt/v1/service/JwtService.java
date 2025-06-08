@@ -17,47 +17,52 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
+import jakarta.validation.ValidationException;
+
 @Service
 public class JwtService {
 
 	public JwtDTO validate(Jwt jwtObj) {
-
-		jwtObj.setClaims(getClaims(jwtObj));
-		
+		jwtObj.setClaims(validateClaimNames(jwtObj));
 		EnumRole.isValidRole(jwtObj.getClaims().getRole());
-		
 		return new JwtDTO(true);
-
 	}
 
-	private static final ObjectMapper objectMapper = new ObjectMapper();
-	
-	private Claims getClaims(Jwt jwt) {
-		
-		String payloadJson = null;
-		
-	    try {
-	        String[] parts = jwt.getJwtToken().split("\\.");
-	        if (parts.length != 3) {
-	            throw new IllegalArgumentException();
-	        }
+	private Claims validateClaimNames(Jwt jwt) {
+		String payloadJson;
 
-	        payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
-	        return objectMapper.readValue(payloadJson, Claims.class);
+		try {
+			String[] parts = jwt.getJwtToken().split("\\.");
+			if (parts.length != 3) {
+				throw new IllegalArgumentException("JWT inválido");
+			}
 
-	    } catch (UnrecognizedPropertyException e) {
-	        String allowedFields = Arrays.toString(getFieldNames(Claims.class));
-	        throw new ClientException(HttpStatus.BAD_REQUEST, "Claim inválido:" + e.getPropertyName() + ". Campos permitidos: " + allowedFields);
+			payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
+			Claims claims = new ObjectMapper().readValue(payloadJson, Claims.class);
 
-	    } catch (JsonParseException | IllegalArgumentException e) {
-	        throw new ClientException(HttpStatus.OK, "JWT inválido");
-	    } catch (Exception e) {
-	        throw new RuntimeException("Erro desconhecido: procure a equipe de suporte.", e);
-	    }
+			if (claims.getName() != null && claims.getName().matches(".*\\d.*")) {
+				throw new ValidationException("Claim inválido: 'Name' não pode conter números");
+			}
+
+			return claims;
+
+		} catch (UnrecognizedPropertyException e) {
+			String allowedFields = Arrays.toString(getFieldNames(Claims.class));
+			throw new ClientException(HttpStatus.OK,
+					"Claim inválido: " + e.getPropertyName() + " / Campos permitidos: " + allowedFields);
+
+		} catch (JsonParseException e){
+			throw new ClientException(HttpStatus.OK, "JWT inválido");
+		}
+		catch (IllegalArgumentException | ValidationException e) {
+			throw new ClientException(HttpStatus.OK, e.getMessage());
+
+		} catch (Exception e) {
+			throw new RuntimeException("Erro desconhecido: procure a equipe de suporte.", e);
+		}
 	}
-	
+
 	private String[] getFieldNames(Class<?> clazz) {
-	    return ReflectionUtils.getFieldNames(clazz);
+		return ReflectionUtils.getFieldNames(clazz);
 	}
-
 }
