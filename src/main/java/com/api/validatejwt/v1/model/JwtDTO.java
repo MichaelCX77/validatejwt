@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class JwtResponseModel implements Serializable{
+public class JwtDTO implements Serializable{
 
 	private static final long serialVersionUID = 1L;
 	private Boolean isValid;
