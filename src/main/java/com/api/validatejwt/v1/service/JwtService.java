@@ -3,6 +3,7 @@ package com.api.validatejwt.v1.service;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Set;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -17,15 +18,27 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
+
 @Service
 public class JwtService {
 
     private static final String JWT_INVALID_MSG = "JWT inválido";
 
+    private final Validator validator;
+
+    public JwtService(Validator validator) {
+        this.validator = validator;
+    }
+
     public JwtDTO validate(Jwt jwtObj) {
-    	
         Claims claims = extractAndValidateClaims(jwtObj);
 
+        // Validação automática dos campos com @NotBlank
+        validateBean(claims);
+
+        // Validações manuais complementares
         validateName(claims.getName());
         validateSeed(claims.getSeed());
         validateRole(claims.getRole());
@@ -63,6 +76,17 @@ public class JwtService {
             throw new ClientException(HttpStatus.OK, JWT_INVALID_MSG);
         } catch (Exception e) {
             throw new RuntimeException("Erro desconhecido: procure a equipe de suporte.", e);
+        }
+    }
+
+    private void validateBean(Claims claims) {
+        Set<ConstraintViolation<Claims>> violations = validator.validate(claims);
+        if (!violations.isEmpty()) {
+            String msg = violations.stream()
+                .map(v -> "Campo '" + v.getPropertyPath() + "' informado nos claims é inválido: " + v.getMessage())
+                .findFirst()
+                .orElse("Erro de validação");
+            throw new ClientException(HttpStatus.OK, msg);
         }
     }
 

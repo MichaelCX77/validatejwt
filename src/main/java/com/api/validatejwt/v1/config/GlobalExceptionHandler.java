@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
 //  Validate payload errors
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<?> handleMessageNotReadableException(HttpMessageNotReadableException ex) {
-	    String message = "Erro ao processar JSON";
+	    String message = "JSON Inválido";
 
 	    Throwable cause = ex.getCause();
 	    if (cause != null && cause.getClass().getSimpleName().equals("UnrecognizedPropertyException")) {

@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class Jwt implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
-	@NotBlank(message = "jwt é obrigatório")
+	@NotBlank(message = "O campo jwt é obrigatório")
 	private String jwt;
 
 }
