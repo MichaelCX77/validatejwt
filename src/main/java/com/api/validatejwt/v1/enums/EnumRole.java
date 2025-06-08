@@ -9,4 +9,8 @@ public enum EnumRole {
 	    return Arrays.stream(EnumRole.values())
 	                 .anyMatch(enumRole -> enumRole.name().equals(role));
 	}
+	
+    public static String availableRoles() {
+        return Arrays.toString(values());
+    }
 }

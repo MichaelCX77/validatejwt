@@ -22,55 +22,80 @@ import jakarta.validation.ValidationException;
 @Service
 public class JwtService {
 
-	public JwtDTO validate(Jwt jwtObj) {
-		
-		jwtObj.setClaims(validateClaim(jwtObj));
-		String role = jwtObj.getClaims().getRole();
-		
-		boolean isValidRole = EnumRole.isValidRole(role);
-		
-		if (!isValidRole) {
-			throw new ClientException(HttpStatus.OK, "Role inválida: " + role + " / Roles disponíveis: " + Arrays.toString(EnumRole.values()));
-		}
-		
-		return new JwtDTO(true);
-	}
+    public JwtDTO validate(Jwt jwtObj) {
+        Claims claims = extractAndValidateClaims(jwtObj);
 
-	private Claims validateClaim(Jwt jwt) {
-		String payloadJson;
+        validateName(claims.getName());
+        validateSeed(claims.getSeed());
+        validateRole(claims.getRole());
 
-		try {
-			String[] parts = jwt.getJwtToken().split("\\.");
-			if (parts.length != 3) {
-				throw new IllegalArgumentException("JWT inválido");
-			}
+        jwtObj.setClaims(claims);
+        return new JwtDTO(true);
+    }
 
-			payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
-			Claims claims = new ObjectMapper().readValue(payloadJson, Claims.class);
+    private Claims extractAndValidateClaims(Jwt jwt) {
+        try {
+            String[] parts = jwt.getJwtToken().split("\\.");
+            if (parts.length != 3) {
+                throw new IllegalArgumentException("JWT inválido");
+            }
 
-			if (claims.getName() != null && claims.getName().matches(".*\\d.*")) {
-				throw new ValidationException("Claim inválido: 'Name' não pode conter números");
-			}
+            String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
+            return new ObjectMapper().readValue(payloadJson, Claims.class);
 
-			return claims;
+        } catch (UnrecognizedPropertyException e) {
+            String allowedFields = Arrays.toString(getFieldNames(Claims.class));
+            throw new ClientException(
+                HttpStatus.OK,
+                "Claim inválido: " + e.getPropertyName() + " / Campos permitidos: " + allowedFields
+            );
 
-		} catch (UnrecognizedPropertyException e) {
-			String allowedFields = Arrays.toString(getFieldNames(Claims.class));
-			throw new ClientException(HttpStatus.OK,
-					"Claim inválido: " + e.getPropertyName() + " / Campos permitidos: " + allowedFields);
+        } catch (JsonParseException e) {
+            throw new ClientException(HttpStatus.OK, "JWT inválido");
 
-		} catch (JsonParseException e){
-			throw new ClientException(HttpStatus.OK, "JWT inválido");
-		}
-		catch (IllegalArgumentException | ValidationException e) {
-			throw new ClientException(HttpStatus.OK, e.getMessage());
+        } catch (IllegalArgumentException | ValidationException e) {
+            throw new ClientException(HttpStatus.OK, e.getMessage());
 
-		} catch (Exception e) {
-			throw new RuntimeException("Erro desconhecido: procure a equipe de suporte.", e);
-		}
-	}
+        } catch (Exception e) {
+            throw new RuntimeException("Erro desconhecido: procure a equipe de suporte.", e);
+        }
+    }
 
-	private String[] getFieldNames(Class<?> clazz) {
-		return ReflectionUtils.getFieldNames(clazz);
-	}
+    private void validateName(String name) {
+        if (name != null && name.matches(".*\\d.*")) {
+            throw new ClientException(HttpStatus.OK, "Claim inválido: 'Name' não pode conter números");
+        }
+    }
+
+    private void validateSeed(String seedValue) {
+        if (seedValue != null && !isPrime(seedValue)) {
+            throw new ClientException(HttpStatus.OK, "Claim inválido: 'Seed' deve ser um número primo");
+        }
+    }
+
+    private void validateRole(String role) {
+        if (!EnumRole.isValidRole(role)) {
+            throw new ClientException(
+                HttpStatus.OK,
+                "Role inválida: " + role + " / Roles disponíveis: " + EnumRole.availableRoles()
+            );
+        }
+    }
+
+    private boolean isPrime(String seedValue) {
+        try {
+            long number = Long.parseLong(seedValue);
+            if (number < 2) return false;
+            for (long i = 2; i <= Math.sqrt(number); i++) {
+                if (number % i == 0) return false;
+            }
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private String[] getFieldNames(Class<?> clazz) {
+        return ReflectionUtils.getFieldNames(clazz);
+    }
 }
