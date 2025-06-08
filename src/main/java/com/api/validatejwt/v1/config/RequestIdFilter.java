@@ -1,4 +1,4 @@
-package com.api.validatejwt.v1.component;
+package com.api.validatejwt.v1.config;
 
 import java.io.IOException;
 import java.util.UUID;

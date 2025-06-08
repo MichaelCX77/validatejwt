@@ -33,21 +33,24 @@ public class JwtService {
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 	
 	private Claims getClaims(Jwt jwt) {
+		
+		String payloadJson = null;
+		
 	    try {
 	        String[] parts = jwt.getJwtToken().split("\\.");
 	        if (parts.length != 3) {
 	            throw new IllegalArgumentException();
 	        }
 
-	        String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
+	        payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
 	        return objectMapper.readValue(payloadJson, Claims.class);
 
 	    } catch (UnrecognizedPropertyException e) {
 	        String allowedFields = Arrays.toString(getFieldNames(Claims.class));
-	        throw new ClientException(HttpStatus.BAD_REQUEST, "Claims inválidos. Campos permitidos: " + allowedFields);
+	        throw new ClientException(HttpStatus.BAD_REQUEST, "Claim inválido:" + e.getPropertyName() + ". Campos permitidos: " + allowedFields);
 
 	    } catch (JsonParseException | IllegalArgumentException e) {
-	        throw new ClientException(HttpStatus.BAD_REQUEST, "JWT inválido");
+	        throw new ClientException(HttpStatus.OK, "JWT inválido");
 	    } catch (Exception e) {
 	        throw new RuntimeException("Erro desconhecido: procure a equipe de suporte.", e);
 	    }
