@@ -13,17 +13,12 @@ import com.api.validatejwt.v1.service.JwtService;
 @RequestMapping("/api/v1")
 public class JwtController {
 
-	@RestController
-	@RequestMapping(value = "/jwt")
-	public class ClienteController {
+	@Autowired
+	private JwtService jwtService;
 
-		@Autowired
-		private JwtService jwtService;
+	@PostMapping(value = "/jwt")
+	public ResponseEntity<JwtResponseModel> validateJwtToken() {
 
-		@PostMapping
-		public ResponseEntity<JwtResponseModel> validateJwtToken() {
-			
-			return ResponseEntity.ok(new JwtResponseModel());
-		}
+		return ResponseEntity.ok(new JwtResponseModel());
 	}
 }
