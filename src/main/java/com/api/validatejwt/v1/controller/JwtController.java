@@ -21,7 +21,7 @@ public class JwtController {
 	private JwtService jwtService;
 
 	@PostMapping(value = "/jwt")
-	public ResponseEntity<JwtDTO> validateJwtToken(@RequestBody @Valid Jwt jwt) {
+	public ResponseEntity<JwtDTO> validateJwt(@RequestBody @Valid Jwt jwt) {
 		
 		return ResponseEntity.ok(jwtService.validate(jwt));
 	}

@@ -13,7 +13,7 @@
 	<artifactId>validatejwt</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>validatejwt</name>
-	<description>API Project to validate a jwt token</description>
+	<description>API Project to validate a jwt</description>
 	<url />
 	<licenses>
 		<license />

@@ -17,53 +17,63 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
-import jakarta.validation.ValidationException;
-
 @Service
 public class JwtService {
 
+    private static final String JWT_INVALID_MSG = "JWT inválido";
+
     public JwtDTO validate(Jwt jwtObj) {
+    	
         Claims claims = extractAndValidateClaims(jwtObj);
 
         validateName(claims.getName());
         validateSeed(claims.getSeed());
         validateRole(claims.getRole());
 
-        jwtObj.setClaims(claims);
         return new JwtDTO(true);
     }
 
     private Claims extractAndValidateClaims(Jwt jwt) {
+        String payloadJson = extractPayload(jwt.getJwt());
+        return parseClaims(payloadJson);
+    }
+
+    private String extractPayload(String jwt) {
+        String[] parts = jwt.split("\\.");
+        if (parts.length != 3) {
+            throw new ClientException(HttpStatus.OK, JWT_INVALID_MSG);
+        }
         try {
-            String[] parts = jwt.getJwtToken().split("\\.");
-            if (parts.length != 3) {
-                throw new IllegalArgumentException("JWT inválido");
-            }
+            return new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            throw new ClientException(HttpStatus.OK, JWT_INVALID_MSG);
+        }
+    }
 
-            String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
+    private Claims parseClaims(String payloadJson) {
+        try {
             return new ObjectMapper().readValue(payloadJson, Claims.class);
-
         } catch (UnrecognizedPropertyException e) {
             String allowedFields = Arrays.toString(getFieldNames(Claims.class));
             throw new ClientException(
                 HttpStatus.OK,
                 "Claim inválido: " + e.getPropertyName() + " / Campos permitidos: " + allowedFields
             );
-
         } catch (JsonParseException e) {
-            throw new ClientException(HttpStatus.OK, "JWT inválido");
-
-        } catch (IllegalArgumentException | ValidationException e) {
-            throw new ClientException(HttpStatus.OK, e.getMessage());
-
+            throw new ClientException(HttpStatus.OK, JWT_INVALID_MSG);
         } catch (Exception e) {
             throw new RuntimeException("Erro desconhecido: procure a equipe de suporte.", e);
         }
     }
 
     private void validateName(String name) {
-        if (name != null && name.matches(".*\\d.*")) {
-            throw new ClientException(HttpStatus.OK, "Claim inválido: 'Name' não pode conter números");
+        if (name != null) {
+            if (name.matches(".*\\d.*")) {
+                throw new ClientException(HttpStatus.OK, "Claim inválido: 'Name' não pode conter números");
+            }
+            if (name.length() > 256) {
+                throw new ClientException(HttpStatus.OK, "Claim inválido: 'Name' não pode exceder 256 caracteres");
+            }
         }
     }
 

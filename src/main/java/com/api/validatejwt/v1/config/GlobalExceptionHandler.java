@@ -13,68 +13,61 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.api.validatejwt.v1.exceptions.ClientException;
 import com.api.validatejwt.v1.model.JwtDTO;
 import com.api.validatejwt.v1.util.ErrorResponse;
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-	
 //  Service Validators
-    @ExceptionHandler(ClientException.class)
-    public ResponseEntity<JwtDTO> handleClientException(ClientException ex) {
-        JwtDTO response = new JwtDTO(false, ex.getMessage());
-        return ResponseEntity.status(ex.getHttpStatus()).body(response);
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<?> handleMessageNotReadableException(HttpMessageNotReadableException ex) {
-        Throwable cause = ex.getCause();
-
-        if (cause instanceof UnrecognizedPropertyException) {
-            JwtDTO response = new JwtDTO(false, ex.getMessage());
-            return ResponseEntity.ok().body(response);
-        }
-
-        JwtDTO response = new JwtDTO(false, ex.getMessage());
-        return ResponseEntity.ok().body(response);
-    }
+	@ExceptionHandler(ClientException.class)
+	public ResponseEntity<JwtDTO> handleClientException(ClientException ex) {
+		JwtDTO response = new JwtDTO(false, ex.getMessage());
+		return ResponseEntity.status(ex.getHttpStatus()).body(response);
+	}
 
 //  Validate payload errors
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
-        List<String> mensagens = ex.getBindingResult()
-                                  .getFieldErrors()
-                                  .stream()
-                                  .map(fieldError -> fieldError.getDefaultMessage())
-                                  .collect(Collectors.toList());
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	public ResponseEntity<?> handleMessageNotReadableException(HttpMessageNotReadableException ex) {
+	    String message = "Erro ao processar JSON";
 
-        String msg = String.join("; ", mensagens);
+	    Throwable cause = ex.getCause();
+	    if (cause != null && cause.getClass().getSimpleName().equals("UnrecognizedPropertyException")) {
+	        com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException unrecEx = 
+	            (com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException) cause;
+	        
+	        String invalidField = unrecEx.getPropertyName();
+	        String allowedFields = unrecEx.getKnownPropertyIds().toString();
+	        message = String.format("Campo inválido no JSON: \"%s\". Campos permitidos são: %s", invalidField, allowedFields);
+	    }
 
-        ErrorResponse error = new ErrorResponse(
-            HttpStatus.BAD_REQUEST.value(),
-            msg
-        );
-        return ResponseEntity.badRequest().body(error);
-    }
+	    ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
+	    return ResponseEntity.badRequest().body(error);
+	}
 
-	//  Unespected errors
-	  @ExceptionHandler(RuntimeException.class)
-	  public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
-	      ErrorResponse error = new ErrorResponse(
-	          HttpStatus.INTERNAL_SERVER_ERROR.value(),
-	          "Erro interno, procure a equipe de suporte"
-	      );
-	      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-	  }
-	  
-	//  Unespected errors
-	  @ExceptionHandler(Exception.class)
-	  public ResponseEntity<ErrorResponse> handleException(Exception ex) {
-	      ErrorResponse error = new ErrorResponse(
-	          HttpStatus.INTERNAL_SERVER_ERROR.value(),
-	          "Erro interno, procure a equipe de suporte"
-	      );
-	      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-	  }
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
+		List<String> messages = ex.getBindingResult().getFieldErrors().stream()
+				.map(fieldError -> fieldError.getDefaultMessage()).collect(Collectors.toList());
+
+		String msg = String.join("; ", messages);
+
+		ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), msg);
+		return ResponseEntity.badRequest().body(error);
+	}
+
+	// Unespected errors
+	@ExceptionHandler(RuntimeException.class)
+	public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
+		ErrorResponse error = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+				"Erro interno, procure a equipe de suporte");
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+	}
+
+	// Unespected errors
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<ErrorResponse> handleException(Exception ex) {
+		ErrorResponse error = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+				"Erro interno, procure a equipe de suporte");
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+	}
 
 }
