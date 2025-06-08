@@ -1,9 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <configuration xmlns="http://ch.qos.logback/xml/ns/logback">
 
     <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
     </appender>
+
+    <!-- Silencia logs de WARN gerados pelo ExceptionHandlerExceptionResolver -->
+    <logger name="org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver" level="ERROR" />
 
     <root level="INFO">
         <appender-ref ref="JSON_CONSOLE"/>

@@ -17,83 +17,95 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Classe responsável por capturar e tratar exceções de forma global
- * para todos os controllers da aplicação.
- * As respostas de erro são padronizadas com um corpo de resposta consistente.
+ * Classe responsável por capturar e tratar exceções lançadas nos controllers da aplicação.
+ * Centraliza a lógica de tratamento de erros para manter os controllers limpos
+ * e padronizar respostas de erro com estrutura consistente.
  */
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
 
     private static final String GENERIC_ERROR_MSG = "Erro interno, procure a equipe de suporte";
-    private static final String JSON_INVALID_MSG = "JSON Inválido";
+    private static final String JSON_INVALID_MSG = "JSON inválido ou malformado.";
 
     /**
-     * Trata exceções do tipo ClientException (exceções customizadas da aplicação)
-     * e retorna uma resposta com o status e a mensagem definida pela exceção.
+     * Trata exceções personalizadas do tipo {@link ClientException}, geralmente associadas a regras de negócio.
+     *
+     * @param ex instância da exceção personalizada
+     * @return resposta HTTP com status e mensagem da exceção
      */
     @ExceptionHandler(ClientException.class)
     public ResponseEntity<ErrorResponse> handleClientException(ClientException ex) {
-        log.warn("ClientException: status={} message={}", ex.getHttpStatus(), ex.getMessage());
+        log.warn("status={} message={}", ex.getHttpStatus(), ex.getMessage());
         ErrorResponse error = new ErrorResponse(ex.getHttpStatus().value(), ex.getMessage());
         return ResponseEntity.status(ex.getHttpStatus()).body(error);
     }
 
     /**
-     * Trata exceções quando o corpo da requisição JSON está malformado ou inválido.
-     * Ex: campo extra, estrutura incorreta, tipo de dado errado etc.
+     * Trata exceções quando o corpo JSON da requisição está malformado ou contém campos inesperados.
+     *
+     * @param ex exceção capturada ao tentar desserializar o JSON
+     * @return resposta HTTP 400 com descrição do problema no JSON
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleMessageNotReadableException(HttpMessageNotReadableException ex) {
         String message = buildJsonErrorMessage(ex);
-        log.warn("JSON parse error: {}", message);
+        log.warn("Erro de leitura de JSON: {}", message);
         ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
         return ResponseEntity.badRequest().body(error);
     }
 
     /**
-     * Extrai uma mensagem mais específica sobre erro de JSON,
-     * como campos desconhecidos ou estrutura inesperada.
+     * Constrói uma mensagem mais clara para erros relacionados à leitura e parsing de JSON.
+     *
+     * @param ex exceção original de leitura do JSON
+     * @return mensagem amigável explicando o erro
      */
     private String buildJsonErrorMessage(HttpMessageNotReadableException ex) {
         Throwable cause = ex.getCause();
 
-        // Verifica se o erro foi causado por um campo inesperado no JSON
         if (cause instanceof UnrecognizedPropertyException unrecEx) {
-            String invalidField = unrecEx.getPropertyName(); // Campo não reconhecido
-            String allowedFields = unrecEx.getKnownPropertyIds().toString(); // Campos válidos esperados
-            return String.format("Campo inválido no JSON: \"%s\". Campos permitidos são: %s", invalidField, allowedFields);
+            String invalidField = unrecEx.getPropertyName();
+            String allowedFields = unrecEx.getKnownPropertyIds().toString();
+            return String.format("Campo inválido no JSON: \"%s\". Campos permitidos: %s", invalidField, allowedFields);
         }
 
         return JSON_INVALID_MSG;
     }
 
     /**
-     * Trata exceções geradas por validações de campos com anotações como @NotBlank, @Email etc.
-     * Retorna uma lista de mensagens de erro combinadas.
+     * Trata exceções lançadas por validações de campos em DTOs (ex: @NotBlank, @Size).
+     * Agrupa todas as mensagens de erro em uma resposta única.
+     *
+     * @param ex exceção de validação de argumento do método
+     * @return resposta HTTP 400 com mensagens de erro concatenadas
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
-        // Coleta todas as mensagens de erro de validação dos campos do DTO
         List<String> messages = ex.getBindingResult().getFieldErrors().stream()
-                .map(fieldError -> fieldError.getDefaultMessage()) // Mensagem definida no DTO
+                .map(fieldError -> fieldError.getDefaultMessage())
                 .collect(Collectors.toList());
 
-        String msg = String.join("; ", messages); // Junta todas as mensagens em uma única string
-        log.warn("Validation errors: {}", msg);
-
+        String msg = String.join("; ", messages);
+        log.warn("Erros de validação: {}", msg);
         ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), msg);
         return ResponseEntity.badRequest().body(error);
     }
 
     /**
-     * Trata qualquer exceção não prevista (fallback).
-     * Garante que o sistema não exponha internamente erros para o usuário final.
+     * Fallback para qualquer outra exceção não tratada explicitamente.
+     * Garante que o sistema não exponha detalhes técnicos ao cliente final.
+     *
+     * @param ex exceção genérica
+     * @return resposta HTTP 500 com mensagem genérica de erro
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
-        log.error("Erro inesperado", ex); // Log completo da exceção para depuração
-        ErrorResponse error = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), GENERIC_ERROR_MSG);
+        log.error("Erro inesperado capturado", ex);
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                GENERIC_ERROR_MSG
+        );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 }
