@@ -23,12 +23,20 @@ import jakarta.validation.ValidationException;
 public class JwtService {
 
 	public JwtDTO validate(Jwt jwtObj) {
-		jwtObj.setClaims(validateClaimNames(jwtObj));
-		EnumRole.isValidRole(jwtObj.getClaims().getRole());
+		
+		jwtObj.setClaims(validateClaim(jwtObj));
+		String role = jwtObj.getClaims().getRole();
+		
+		boolean isValidRole = EnumRole.isValidRole(role);
+		
+		if (!isValidRole) {
+			throw new ClientException(HttpStatus.OK, "Role inválida: " + role + " / Roles disponíveis: " + Arrays.toString(EnumRole.values()));
+		}
+		
 		return new JwtDTO(true);
 	}
 
-	private Claims validateClaimNames(Jwt jwt) {
+	private Claims validateClaim(Jwt jwt) {
 		String payloadJson;
 
 		try {
