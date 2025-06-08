@@ -3,6 +3,7 @@ package com.api.validatejwt.v1.config;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -17,9 +18,8 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Classe responsável por capturar e tratar exceções lançadas nos controllers da aplicação.
- * Centraliza a lógica de tratamento de erros para manter os controllers limpos
- * e padronizar respostas de erro com estrutura consistente.
+ * Handler global para interceptação e tratamento centralizado de exceções lançadas pelos controllers.
+ * Aplica padronização de respostas de erro e log estruturado com MDC para rastreamento.
  */
 @RestControllerAdvice
 @Slf4j
@@ -29,37 +29,43 @@ public class GlobalExceptionHandler {
     private static final String JSON_INVALID_MSG = "JSON inválido ou malformado.";
 
     /**
-     * Trata exceções personalizadas do tipo {@link ClientException}, geralmente associadas a regras de negócio.
+     * Trata exceções do tipo {@link ClientException}, que representam erros de negócio definidos pela aplicação.
      *
-     * @param ex instância da exceção personalizada
-     * @return resposta HTTP com status e mensagem da exceção
+     * @param ex Exceção personalizada lançada por regras de negócio
+     * @return {@link ResponseEntity} com status e mensagem apropriados
      */
     @ExceptionHandler(ClientException.class)
     public ResponseEntity<ErrorResponse> handleClientException(ClientException ex) {
-        log.warn("status={} message={}", ex.getHttpStatus(), ex.getMessage());
-        ErrorResponse error = new ErrorResponse(ex.getHttpStatus().value(), ex.getMessage());
+        int status = ex.getHttpStatus().value();
+        MDC.put("status", String.valueOf(status));
+        log.warn("Erro de negócio capturado: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(status, ex.getMessage());
         return ResponseEntity.status(ex.getHttpStatus()).body(error);
     }
 
     /**
-     * Trata exceções quando o corpo JSON da requisição está malformado ou contém campos inesperados.
+     * Trata exceções relacionadas à desserialização incorreta do JSON da requisição.
+     * Isso pode incluir campos inesperados, formatos inválidos ou estrutura malformada.
      *
-     * @param ex exceção capturada ao tentar desserializar o JSON
-     * @return resposta HTTP 400 com descrição do problema no JSON
+     * @param ex Exceção lançada pela falha na leitura do corpo da requisição
+     * @return {@link ResponseEntity} com detalhes amigáveis do erro
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleMessageNotReadableException(HttpMessageNotReadableException ex) {
+        int status = HttpStatus.BAD_REQUEST.value();
+        MDC.put("status", String.valueOf(status));
         String message = buildJsonErrorMessage(ex);
-        log.warn("Erro de leitura de JSON: {}", message);
-        ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
+        log.warn("Falha ao interpretar corpo da requisição: {}", message);
+        ErrorResponse error = new ErrorResponse(status, message);
         return ResponseEntity.badRequest().body(error);
     }
 
     /**
-     * Constrói uma mensagem mais clara para erros relacionados à leitura e parsing de JSON.
+     * Constrói mensagens amigáveis a partir de exceções de leitura de JSON.
+     * Fornece instruções sobre campos inválidos ou desconhecidos.
      *
-     * @param ex exceção original de leitura do JSON
-     * @return mensagem amigável explicando o erro
+     * @param ex Exceção original
+     * @return Mensagem legível para o consumidor da API
      */
     private String buildJsonErrorMessage(HttpMessageNotReadableException ex) {
         Throwable cause = ex.getCause();
@@ -74,38 +80,43 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Trata exceções lançadas por validações de campos em DTOs (ex: @NotBlank, @Size).
-     * Agrupa todas as mensagens de erro em uma resposta única.
+     * Trata exceções de validação de campos de entrada nos DTOs,
+     * como anotações do tipo {@code @NotBlank}, {@code @Size}, etc.
      *
-     * @param ex exceção de validação de argumento do método
-     * @return resposta HTTP 400 com mensagens de erro concatenadas
+     * @param ex Exceção de validação
+     * @return {@link ResponseEntity} com lista de mensagens de erro
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
+        int status = HttpStatus.BAD_REQUEST.value();
+        MDC.put("status", String.valueOf(status));
+
         List<String> messages = ex.getBindingResult().getFieldErrors().stream()
                 .map(fieldError -> fieldError.getDefaultMessage())
                 .collect(Collectors.toList());
 
-        String msg = String.join("; ", messages);
-        log.warn("Erros de validação: {}", msg);
-        ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), msg);
+        String combinedMessage = String.join("; ", messages);
+        log.warn("Erro de validação nos campos da requisição: {}", combinedMessage);
+
+        ErrorResponse error = new ErrorResponse(status, combinedMessage);
         return ResponseEntity.badRequest().body(error);
     }
 
     /**
-     * Fallback para qualquer outra exceção não tratada explicitamente.
-     * Garante que o sistema não exponha detalhes técnicos ao cliente final.
+     * Fallback para exceções não mapeadas especificamente.
+     * Evita exposição de detalhes internos da aplicação ao cliente.
      *
-     * @param ex exceção genérica
-     * @return resposta HTTP 500 com mensagem genérica de erro
+     * @param ex Exceção genérica ou não tratada
+     * @return {@link ResponseEntity} com mensagem genérica e status 500
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
-        log.error("Erro inesperado capturado", ex);
-        ErrorResponse error = new ErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                GENERIC_ERROR_MSG
-        );
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        int status = HttpStatus.INTERNAL_SERVER_ERROR.value();
+        MDC.put("status", String.valueOf(status));
+
+        log.error("Falha inesperada no servidor. Traceback registrado.", ex);
+
+        ErrorResponse error = new ErrorResponse(status, GENERIC_ERROR_MSG);
+        return ResponseEntity.status(status).body(error);
     }
 }
