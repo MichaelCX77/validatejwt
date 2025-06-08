@@ -1,8 +1,5 @@
 package com.api.validatejwt.v1.model;
 
-import java.lang.reflect.Field;
-import java.util.Arrays;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -24,12 +21,4 @@ public class Claims {
 	
 	@JsonProperty("Name")
 	private String name;
-	
-    public String[] getArrayFields(){
-        Field[] fields = Claims.class.getDeclaredFields();
-        
-        return Arrays.stream(fields)
-                .map(Field::getName)
-                .toArray(String[]::new);
-    }
 }
