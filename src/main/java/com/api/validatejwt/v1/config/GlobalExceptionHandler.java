@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.api.validatejwt.v1.exceptions.ClientException;
 import com.api.validatejwt.v1.util.ErrorResponse;
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
 
     private static final String GENERIC_ERROR_MSG = "Erro interno, procure a equipe de suporte";
-    private static final String JSON_INVALID_MSG = "JSON inválido ou malformado.";
 
     /**
      * Trata exceções do tipo {@link ClientException}, que representam erros de negócio definidos pela aplicação.
@@ -38,7 +36,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleClientException(ClientException ex) {
         int status = ex.getHttpStatus().value();
         MDC.put("status", String.valueOf(status));
-        log.warn("Erro de negócio capturado: {}", ex.getMessage());
+        log.warn(ex.getMessage());
         ErrorResponse error = new ErrorResponse(status, ex.getMessage());
         return ResponseEntity.status(ex.getHttpStatus()).body(error);
     }
@@ -54,30 +52,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMessageNotReadableException(HttpMessageNotReadableException ex) {
         int status = HttpStatus.BAD_REQUEST.value();
         MDC.put("status", String.valueOf(status));
-        String message = buildJsonErrorMessage(ex);
-        log.warn("Falha ao interpretar corpo da requisição: {}", message);
-        ErrorResponse error = new ErrorResponse(status, message);
+        log.warn("Falha ao interpretar corpo da requisição: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(status, ex.getMessage());
         return ResponseEntity.badRequest().body(error);
     }
 
-    /**
-     * Constrói mensagens amigáveis a partir de exceções de leitura de JSON.
-     * Fornece instruções sobre campos inválidos ou desconhecidos.
-     *
-     * @param ex Exceção original
-     * @return Mensagem legível para o consumidor da API
-     */
-    private String buildJsonErrorMessage(HttpMessageNotReadableException ex) {
-        Throwable cause = ex.getCause();
-
-        if (cause instanceof UnrecognizedPropertyException unrecEx) {
-            String invalidField = unrecEx.getPropertyName();
-            String allowedFields = unrecEx.getKnownPropertyIds().toString();
-            return String.format("Campo inválido no JSON: \"%s\". Campos permitidos: %s", invalidField, allowedFields);
-        }
-
-        return JSON_INVALID_MSG;
-    }
 
     /**
      * Trata exceções de validação de campos de entrada nos DTOs,

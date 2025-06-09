@@ -20,25 +20,46 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Serviço responsável pela validação de tokens JWT.
+ * Realiza extração, validação estrutural e semântica dos claims do token.
+ * Aplica validações customizadas e lança exceções específicas em caso de erro.
+ */
 @Service
+@Slf4j
 public class JwtService {
 
     private static final String JWT_INVALID_MSG = "JWT inválido";
 
     private final Validator validator;
+    private final ObjectMapper objectMapper;
 
+    /**
+     * Construtor que recebe o validador e instancia o ObjectMapper.
+     * 
+     * @param validator Validador de bean para validar claims com anotações
+     */
     public JwtService(Validator validator) {
         this.validator = validator;
+        this.objectMapper = new ObjectMapper();
     }
 
+    /**
+     * Valida o JWT fornecido. Extrai e valida os claims do token,
+     * incluindo validação automática e regras customizadas.
+     * 
+     * @param jwtObj Objeto contendo o JWT a ser validado
+     * @return {@link JwtDTO} indicando sucesso da validação
+     * @throws ClientException em caso de validação inválida
+     */
     public JwtDTO validate(Jwt jwtObj) {
+
         Claims claims = extractAndValidateClaims(jwtObj);
 
-        // Validação automática dos campos com @NotBlank
         validateBean(claims);
 
-        // Validações manuais complementares
         validateName(claims.getName());
         validateSeed(claims.getSeed());
         validateRole(claims.getRole());
@@ -46,32 +67,52 @@ public class JwtService {
         return new JwtDTO(true);
     }
 
+    /**
+     * Extrai o payload do JWT e faz o parse dos claims em objeto Claims.
+     * 
+     * @param jwt Objeto JWT contendo o token
+     * @return Claims extraídos e validados
+     * @throws ClientException para token mal formado ou claims inválidos
+     */
     private Claims extractAndValidateClaims(Jwt jwt) {
         String payloadJson = extractPayload(jwt.getJwt());
         return parseClaims(payloadJson);
     }
 
-    private String extractPayload(String jwt) {
-        String[] parts = jwt.split("\\.");
+    /**
+     * Extrai a parte do payload do JWT decodificando Base64 URL.
+     * 
+     * @param jwtString String do token JWT
+     * @return JSON do payload decodificado
+     * @throws ClientException se token estiver mal formatado ou inválido
+     */
+    private String extractPayload(String jwtString) {
+        String[] parts = jwtString.split("\\.");
         if (parts.length != 3) {
             throw new ClientException(HttpStatus.OK, JWT_INVALID_MSG);
         }
         try {
             return new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
         } catch (IllegalArgumentException e) {
+        	
             throw new ClientException(HttpStatus.OK, JWT_INVALID_MSG);
         }
     }
 
+    /**
+     * Converte JSON do payload em objeto Claims, tratando exceções específicas.
+     * 
+     * @param payloadJson JSON do payload JWT
+     * @return Objeto Claims convertido
+     * @throws ClientException para propriedades inválidas ou JSON mal formado
+     */
     private Claims parseClaims(String payloadJson) {
         try {
-            return new ObjectMapper().readValue(payloadJson, Claims.class);
+            return objectMapper.readValue(payloadJson, Claims.class);
         } catch (UnrecognizedPropertyException e) {
             String allowedFields = Arrays.toString(getFieldNames(Claims.class));
-            throw new ClientException(
-                HttpStatus.OK,
-                "Claim inválido: " + e.getPropertyName() + " / Campos permitidos: " + allowedFields
-            );
+            String msg = String.format("Campo inválido no JSON: %s / Campos permitidos: %s", e.getPropertyName(), allowedFields);
+            throw new ClientException(HttpStatus.OK, msg);
         } catch (JsonParseException e) {
             throw new ClientException(HttpStatus.OK, JWT_INVALID_MSG);
         } catch (Exception e) {
@@ -79,6 +120,12 @@ public class JwtService {
         }
     }
 
+    /**
+     * Valida o objeto Claims usando validação Bean Validation (@NotBlank, etc).
+     * 
+     * @param claims Claims a serem validados
+     * @throws ClientException se houver violação de restrições
+     */
     private void validateBean(Claims claims) {
         Set<ConstraintViolation<Claims>> violations = validator.validate(claims);
         if (!violations.isEmpty()) {
@@ -90,6 +137,12 @@ public class JwtService {
         }
     }
 
+    /**
+     * Valida o campo 'name' dos claims com regras específicas.
+     * 
+     * @param name Nome a ser validado
+     * @throws ClientException se o nome contiver números ou exceder tamanho
+     */
     private void validateName(String name) {
         if (name != null) {
             if (name.matches(".*\\d.*")) {
@@ -101,34 +154,50 @@ public class JwtService {
         }
     }
 
+    /**
+     * Valida o campo 'role' verificando se está entre os papéis válidos.
+     * 
+     * @param role Papel a ser validado
+     * @throws ClientException se o papel for inválido
+     */
+    private void validateRole(String role) {
+        if (!EnumRole.isValidRole(role)) {
+            String msg = "Role inválida: " + role + " / Roles disponíveis: " + EnumRole.availableRoles();
+            throw new ClientException(HttpStatus.OK, msg);
+        }
+    }
+
+    /**
+     * Valida o campo 'seed' garantindo que seja um número primo válido.
+     *
+     * @param seedValue Valor da seed em string
+     * @throws ClientException se não for um número válido ou não for primo
+     */
     private void validateSeed(String seedValue) {
-        if (seedValue != null && !isPrime(seedValue)) {
+        if (seedValue == null) return;
+
+        try {
+            long number = Long.parseLong(seedValue);
+            if (number < 2) {
+                throw new ClientException(HttpStatus.OK, "Claim inválido: 'Seed' deve ser um número primo");
+            }
+            for (long i = 2; i <= Math.sqrt(number); i++) {
+                if (number % i == 0) {
+                    throw new ClientException(HttpStatus.OK, "Claim inválido: 'Seed' deve ser um número primo");
+                }
+            }
+        } catch (NumberFormatException e) {
             throw new ClientException(HttpStatus.OK, "Claim inválido: 'Seed' deve ser um número primo");
         }
     }
 
-    private void validateRole(String role) {
-        if (!EnumRole.isValidRole(role)) {
-            throw new ClientException(
-                HttpStatus.OK,
-                "Role inválida: " + role + " / Roles disponíveis: " + EnumRole.availableRoles()
-            );
-        }
-    }
 
-    private boolean isPrime(String seedValue) {
-        try {
-            long number = Long.parseLong(seedValue);
-            if (number < 2) return false;
-            for (long i = 2; i <= Math.sqrt(number); i++) {
-                if (number % i == 0) return false;
-            }
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
+    /**
+     * Recupera os nomes dos campos da classe para auxiliar em mensagens de erro.
+     * 
+     * @param clazz Classe a ser analisada
+     * @return Array de nomes de campos
+     */
     private String[] getFieldNames(Class<?> clazz) {
         return ReflectionUtils.getFieldNames(clazz);
     }
