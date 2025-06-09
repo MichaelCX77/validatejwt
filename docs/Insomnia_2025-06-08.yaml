@@ -1,0 +1,404 @@
+type: collection.insomnia.rest/5.0
+name: ValidateJwt API
+meta:
+  id: wrk_b055b420d4864d72a9a021d195d7423d
+  created: 1749341184370
+  modified: 1749341214930
+  description: ""
+collection:
+  - name: Jwt API
+    meta:
+      id: fld_ce0bb0e53938456baadfefeba4782e49
+      created: 1749341229068
+      modified: 1749341450204
+      sortKey: -1749341229068
+      description: ""
+    children:
+      - name: Examples
+        meta:
+          id: fld_989c76357ab5409eb283ba9bdf81c3c7
+          created: 1749408070256
+          modified: 1749408070256
+          sortKey: -1749408070256
+          description: ""
+        children:
+          - url: "{{ _.base_path }}/api/v1/jwt"
+            name: JWT válido
+            meta:
+              id: req_3776d18b1c4345959dc74efed9082508
+              created: 1749408248004
+              modified: 1749408789625
+              isPrivate: false
+              description: ""
+              sortKey: -1749408260552
+            method: POST
+            body:
+              text: "{\r \t\"jwt\":
+                \"eyJhbGciOiJIUzI1NiJ9.eyJOYW1lIjoiVG9uaW5obyBBcmF1am8iLCJSb2xl\
+                IjoiRXh0ZXJuYWwiLCJTZWVkIjoiMTcifQ.signature\"\r }"
+              mimeType: application/json
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/11.2.0
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.base_path }}/api/v1/jwt"
+            name: JWT com claims extras (mais que 3 claims)
+            meta:
+              id: req_2a3f6dbf0ee64c66a2fa2373b3f81f98
+              created: 1749408316123
+              modified: 1749408791357
+              isPrivate: false
+              description: ""
+              sortKey: -1749408260502
+            method: POST
+            body:
+              text: "{\r \t\"jwt\":
+                \"eyJhbGciOiJIUzI1NiJ9.eyJOYW1lIjoiVG9uaW5obyBBcmF1am8iLCJSb2xl\
+                IjoiRXh0ZXJuYWwiLCJTZWVkIjoiMTciLCJFeHRyYSI6IkV4dHJhIn0.signatu\
+                re\"\r }"
+              mimeType: application/json
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/11.2.0
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.base_path }}/api/v1/jwt"
+            name: Claim Name com números (inválido)
+            meta:
+              id: req_3204660900e54fa99876805412b1db6a
+              created: 1749408366768
+              modified: 1749408793093
+              isPrivate: false
+              description: ""
+              sortKey: -1749408260477
+            method: POST
+            body:
+              text: "{\r \t\"jwt\":
+                \"eyJhbGciOiJIUzI1NiJ9.eyJOYW1lIjoiVG9uaW5obyAxMjMiLCJSb2xlIjoi\
+                TWVtYmVyIiwiU2VlZCI6IjE3In0.signature\"\r }"
+              mimeType: application/json
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/11.2.0
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.base_path }}/api/v1/jwt"
+            name: Claim Role inválido (não está entre Admin, Member e External)
+            meta:
+              id: req_192be4672ce64bc7a79636f19391565d
+              created: 1749408403917
+              modified: 1749408794704
+              isPrivate: false
+              description: ""
+              sortKey: -1749408260464.5
+            method: POST
+            body:
+              mimeType: application/json
+              text: >-
+                {
+                	"jwt": "eyJhbGciOiJIUzI1NiJ9.eyJOYW1lIjoiVG9uaW5obyBBcmF1am9hYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwiUm9sZSI6IkFkbWluIiwiU2VlZCI6IjE3In0.BbeSk1tsfeF8uiUYBcjkDM8jNqE6N8jGP1P5SG9hwqc"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/11.2.0
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.base_path }}/api/v1/jwt"
+            name: Claim Seed não é número primo (inválido)
+            meta:
+              id: req_fff43e4a787a43e6a44d85158c391027
+              created: 1749408436932
+              modified: 1749408796207
+              isPrivate: false
+              description: ""
+              sortKey: -1749408260458.25
+            method: POST
+            body:
+              text: "{\r \t\"jwt\":
+                \"eyJhbGciOiJIUzI1NiJ9.eyJOYW1lIjoiVG9uaW5obyBBcmF1am8iLCJSb2xl\
+                IjoiQWRtaW4iLCJTZWVkIjoiMTgifQ.signature\"\r }"
+              mimeType: application/json
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/11.2.0
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.base_path }}/api/v1/jwt"
+            name: Claim Name maior que 256 caracteres (inválido)
+            meta:
+              id: req_9cab560771af4af586c9360657a3c6f6
+              created: 1749408511603
+              modified: 1749409525400
+              isPrivate: false
+              description: ""
+              sortKey: -1749408260452
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                "jwt": "eyJhbGciOiJIUzI1NiJ9.eyJOYW1lIjoiVG9uaW5obyBBcmF1am9hYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwiUm9sZSI6IkFkbWluIiwiU2VlZCI6IjE3In0.BbeSk1tsfeF8uiUYBcjkDM8jNqE6N8jGP1P5SG9hwqc"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/11.2.0
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.base_path }}/api/v1/jwt"
+            name: Plus - JWT com campo excedente
+            meta:
+              id: req_b2bf672296224bfea3c1eb944428b3e1
+              created: 1749408782539
+              modified: 1749408896516
+              isPrivate: false
+              description: ""
+              sortKey: -1749408259752
+            method: POST
+            body:
+              mimeType: application/json
+              text: >-
+                {
+                 	"jwt": "eyJhbGciOiJIUzI1NiJ9.eyJOYW1lIjoiQWxleGFuZHJlIiwiUm9sZSI6IkFkbWluIiwiU2VlZCI6IjE5IiwiRXh0cmFDbGFpbSI6IlZhbG9yIn0.tjX1ct0A3DYHCVc2y8RE4dGqx3_d7_dkvmvKoA-Eo9A"
+                 }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/11.2.0
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.base_path }}/api/v1/jwt"
+            name: Plus - JWT com campo Name nulo (null)
+            meta:
+              id: req_f8238e9c4da542be83c92974e0c77328
+              created: 1749408867052
+              modified: 1749408906138
+              isPrivate: false
+              description: ""
+              sortKey: -1749408259652
+            method: POST
+            body:
+              text: "{\r \t\"jwt\":
+                \"eyJhbGciOiJIUzI1NiJ9.eyJOYW1lIjpudWxsLCJSb2xlIjoiTWVtYmVyIiwi\
+                U2VlZCI6IjE3In0.4kKw2YLH2H4nRrFjsJzBd8iwCF46iNRQO0ybzJHYRhQ\"\r
+                }"
+              mimeType: application/json
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/11.2.0
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.base_path }}/api/v1/jwt"
+            name: Plus - Json Vazio
+            meta:
+              id: req_83dc7e486c464a3aa27af27ebe0492cb
+              created: 1749409009324
+              modified: 1749409392827
+              isPrivate: false
+              description: ""
+              sortKey: -1749408259552
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/11.2.0
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.base_path }}/api/v1/jwt"
+            name: Plus - JWT com campo Role vazio (string vazia)
+            meta:
+              id: req_cfe2acc28b814cf187adf84cfc2ec3c5
+              created: 1749409318466
+              modified: 1749409619339
+              isPrivate: false
+              description: ""
+              sortKey: -1749408259602
+            method: POST
+            body:
+              text: "{\r \t\"jwt\":
+                \"eyJhbGciOiJIUzI1NiJ9.eyJOYW1lIjoiTWFyaWEiLCJSb2xlIjoiIiwiU2Vl\
+                ZCI6IjIzIn0.gy3wiMYXU_0JdD6IzLbtg6CIMoZT4W2v8x47Ae-6F28\"\r }"
+              mimeType: application/json
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/11.2.0
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.base_path }}/api/v1/jwt"
+            name: Plus - Json inválido
+            meta:
+              id: req_1912306f3e5f48058eac98e71fc00d90
+              created: 1749409406698
+              modified: 1749409466955
+              isPrivate: false
+              description: ""
+              sortKey: -1749374745715
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                ssasas/asa;
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/11.2.0
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - url: "{{ _.base_path }}/api/v1/jwt"
+        name: POST Validate JWTToken
+        meta:
+          id: req_2b6d9f8fcc4544d39787beba015ad5a4
+          created: 1749341231878
+          modified: 1749408275882
+          isPrivate: false
+          description: ""
+          sortKey: -1749341231878
+        method: POST
+        body:
+          mimeType: application/json
+          text: >-
+            {
+            	"jwt": "eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiRXh0ZXJuYWwiLCJTZWVkIjoiNzg0MCIsIk5hbWUiOiJUb25pbmhvIEFyYXVqb0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQSJ9.eSIo5pDHuCAjYeHfd5NG7Tg4aatbmJYrW-sCmb3ZWvs"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.2.0
+            id: pair_415b4c47e6104e40b4895d9854d77ff1
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_38564bfa6d8ef487962b30b21a74a7cfd60a4622
+    created: 1749341184374
+    modified: 1749341184374
+environments:
+  name: Base Environment
+  meta:
+    id: env_38564bfa6d8ef487962b30b21a74a7cfd60a4622
+    created: 1749341184373
+    modified: 1749341184373
+    isPrivate: false
+  subEnvironments:
+    - name: LOCAL
+      meta:
+        id: env_97eb061268d947ea9302378e63f74885
+        created: 1749341260924
+        modified: 1749341350560
+        isPrivate: false
+        sortKey: 1749341260924
+      data:
+        base_path: http://localhost:8080
+    - name: DEV_AWS
+      meta:
+        id: env_ee39a88cf7974b5a841b6edf7375c1e7
+        created: 1749341276052
+        modified: 1749341316056
+        isPrivate: false
+        sortKey: 1749341276052
+    - name: HOM_AWS
+      meta:
+        id: env_8e45e2a803b04a8283b59a6d8411ba20
+        created: 1749341285408
+        modified: 1749341289930
+        isPrivate: false
+        sortKey: 1749341285408

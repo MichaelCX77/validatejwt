@@ -1,0 +1,14 @@
+{
+    "@timestamp": "2025-06-08T22:09:14.8313334-03:00",
+    "@version": "1",
+    "message": "Falha ao interpretar corpo da requisição: JSON parse error: Unrecognized field \"jwtToken\" (class com.api.validatejwt.v1.model.Jwt), not marked as ignorable",
+    "logger_name": "com.api.validatejwt.v1.config.GlobalExceptionHandler",
+    "thread_name": "http-nio-8080-exec-2",
+    "level": "WARN",
+    "level_value": 30000,
+    "path": "/api/v1/jwt",
+    "method": "POST",
+    "requestId": "1bfb9abf-c007-47b4-9908-5ccdd6c14441",
+    "clientIp": "127.0.0.1",
+    "status": "400"
+}

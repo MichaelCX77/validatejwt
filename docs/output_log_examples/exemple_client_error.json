@@ -1,0 +1,31 @@
+{
+    "errors": [
+        {
+            "@timestamp": "2025-06-08T22:06:27.5428302-03:00",
+            "@version": "1",
+            "message": "Recebida requisição para validação de JWT",
+            "logger_name": "com.api.validatejwt.v1.controller.JwtController",
+            "thread_name": "http-nio-8080-exec-9",
+            "level": "INFO",
+            "level_value": 20000,
+            "path": "/api/v1/jwt",
+            "method": "POST",
+            "requestId": "0a26def0-182d-4d01-b8a6-a558acfc3d0c",
+            "clientIp": "127.0.0.1"
+        },
+        {
+            "@timestamp": "2025-06-08T22:06:27.5438294-03:00",
+            "@version": "1",
+            "message": "Claim inválido: 'Name' não pode exceder 256 caracteres",
+            "logger_name": "com.api.validatejwt.v1.config.GlobalExceptionHandler",
+            "thread_name": "http-nio-8080-exec-9",
+            "level": "WARN",
+            "level_value": 30000,
+            "path": "/api/v1/jwt",
+            "method": "POST",
+            "requestId": "0a26def0-182d-4d01-b8a6-a558acfc3d0c",
+            "clientIp": "127.0.0.1",
+            "status": "200"
+        }
+    ]
+}
