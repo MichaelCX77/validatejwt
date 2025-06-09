@@ -11,7 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.api.validatejwt.v1.exceptions.ClientException;
+import com.api.validatejwt.v1.exception.ClientException;
 import com.api.validatejwt.v1.util.ErrorResponse;
 
 import lombok.extern.slf4j.Slf4j;
