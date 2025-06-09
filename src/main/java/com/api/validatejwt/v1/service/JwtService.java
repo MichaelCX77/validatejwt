@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.api.validatejwt.v1.enums.EnumRole;
-import com.api.validatejwt.v1.exceptions.ClientException;
-import com.api.validatejwt.v1.model.Claims;
+import com.api.validatejwt.v1.exception.ClientException;
+import com.api.validatejwt.v1.model.Claim;
 import com.api.validatejwt.v1.model.Jwt;
 import com.api.validatejwt.v1.model.JwtDTO;
 import com.api.validatejwt.v1.util.ReflectionUtils;
@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Serviço responsável pela validação de tokens JWT.
@@ -28,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
  * Aplica validações customizadas e lança exceções específicas em caso de erro.
  */
 @Service
-@Slf4j
 public class JwtService {
 
     private static final String JWT_INVALID_MSG = "JWT inválido";
@@ -56,7 +54,7 @@ public class JwtService {
      */
     public JwtDTO validate(Jwt jwtObj) {
 
-        Claims claims = extractAndValidateClaims(jwtObj);
+        Claim claims = extractAndValidateClaims(jwtObj);
 
         validateBean(claims);
 
@@ -74,7 +72,7 @@ public class JwtService {
      * @return Claims extraídos e validados
      * @throws ClientException para token mal formado ou claims inválidos
      */
-    private Claims extractAndValidateClaims(Jwt jwt) {
+    private Claim extractAndValidateClaims(Jwt jwt) {
         String payloadJson = extractPayload(jwt.getJwt());
         return parseClaims(payloadJson);
     }
@@ -106,11 +104,11 @@ public class JwtService {
      * @return Objeto Claims convertido
      * @throws ClientException para propriedades inválidas ou JSON mal formado
      */
-    private Claims parseClaims(String payloadJson) {
+    private Claim parseClaims(String payloadJson) {
         try {
-            return objectMapper.readValue(payloadJson, Claims.class);
+            return objectMapper.readValue(payloadJson, Claim.class);
         } catch (UnrecognizedPropertyException e) {
-            String allowedFields = Arrays.toString(getFieldNames(Claims.class));
+            String allowedFields = Arrays.toString(getFieldNames(Claim.class));
             String msg = String.format("Campo inválido no JSON: %s / Campos permitidos: %s", e.getPropertyName(), allowedFields);
             throw new ClientException(HttpStatus.OK, msg);
         } catch (JsonParseException e) {
@@ -126,8 +124,8 @@ public class JwtService {
      * @param claims Claims a serem validados
      * @throws ClientException se houver violação de restrições
      */
-    private void validateBean(Claims claims) {
-        Set<ConstraintViolation<Claims>> violations = validator.validate(claims);
+    private void validateBean(Claim claims) {
+        Set<ConstraintViolation<Claim>> violations = validator.validate(claims);
         if (!violations.isEmpty()) {
             String msg = violations.stream()
                 .map(v -> "Campo '" + v.getPropertyPath() + "' informado nos claims é inválido: " + v.getMessage())

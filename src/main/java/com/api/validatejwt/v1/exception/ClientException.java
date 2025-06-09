@@ -1,4 +1,4 @@
-package com.api.validatejwt.v1.exceptions;
+package com.api.validatejwt.v1.exception;
 
 import org.springframework.http.HttpStatus;
 
