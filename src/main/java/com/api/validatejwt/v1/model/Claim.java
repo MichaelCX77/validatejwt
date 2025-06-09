@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 @Data
 @ToString
-public class Claims {
+public class Claim {
 
     /**
      * Papel ou perfil do usuário (exemplo: "ADMIN", "USER").
