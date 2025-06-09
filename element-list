@@ -2,7 +2,7 @@ com.api.validatejwt
 com.api.validatejwt.v1.config
 com.api.validatejwt.v1.controller
 com.api.validatejwt.v1.enums
-com.api.validatejwt.v1.exceptions
+com.api.validatejwt.v1.exception
 com.api.validatejwt.v1.model
 com.api.validatejwt.v1.service
 com.api.validatejwt.v1.util
