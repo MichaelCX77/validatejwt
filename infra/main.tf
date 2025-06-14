@@ -5,4 +5,5 @@ module "ecs_service" {
   memory          = var.memory
   container_port  = var.container_port
   desired_count   = var.desired_count
+  vpc_name        = var.vpc_name
 }
