@@ -9,7 +9,7 @@ jobs:
   deploy-package:
     uses: MichaelCX77/infra-base/.github/workflows/deploy.yml@develop
     with:
-      project_name: validatejwt
+      project_name: ${{ github.repository }}
       repo: ${{ github.repository }}
       ref: ${{ github.ref_name }}
     secrets:
