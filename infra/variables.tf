@@ -34,8 +34,8 @@ variable "container_port" {
   default     = 80
 }
 
-variable "image" {
-  description = "Imagem Docker completa com tag (ex: 123456789012.dkr.ecr.sa-east-1.amazonaws.com/projeto:tag)"
+variable "vpc_name" {
+  description = "Nome da VPC"
   type        = string
-  default     = ""
+  default = "MYVPC"
 }
