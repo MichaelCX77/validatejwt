@@ -1,5 +1,5 @@
-module "ecs_service" {
-  source          = "../../infra-base/"
+module "ecs" {
+  source          = "git::https://github.com/MichaelCX77/infra-base.git?ref=develop"
   project_name    = var.project_name
   cpu             = var.cpu
   memory          = var.memory
