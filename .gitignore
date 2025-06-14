@@ -20,3 +20,6 @@ mvnw*
 .settings
 .terraform*
 HELP.md
+
+terraform.tfstate
+terraform.tfstate.backup

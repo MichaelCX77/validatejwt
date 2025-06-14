@@ -34,8 +34,20 @@ variable "container_port" {
   default     = 80
 }
 
-variable "vpc_name" {
-  description = "Nome da VPC"
+variable "vpc_id" {
+  description = "ID da VPC"
   type        = string
-  default = "MYVPC"
+  default = "vpc-095a2552dec82c1b2"
+}
+
+variable "subnet_ids" {
+  description = "Lista de subnets públicas para Load Balancer e ECS"
+  type        = list(string)
+  default = ["subnet-001b9943999c46f1e","subnet-064cd7760ca940201"]
+}
+
+variable "capacity_provider" {
+  description = "Tipo de instancias ['FARGATE','FARGATE_SPOT']"
+  type        = string
+  default = "FARGATE_SPOT"
 }
