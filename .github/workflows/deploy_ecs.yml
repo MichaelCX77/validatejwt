@@ -10,6 +10,8 @@ jobs:
     uses: MichaelCX77/infra-base/.github/workflows/deploy.yml@develop
     with:
       project_name: validatejwt
+      repo: ${{ github.repository }}
+      ref: ${{ github.ref_name }}
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
