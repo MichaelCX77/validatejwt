@@ -1,4 +1,4 @@
-name: Test and Create PR to Develop
+name: Run Unit Tests and Coverage + PR to Develop
 
 on:
   push:
@@ -23,15 +23,13 @@ jobs:
         run: |
           mvn clean test jacoco:report
           echo "### Coverage Summary ###"
-          # Extrai as linhas do relatório HTML gerado para resumo (exemplo simples)
-          grep -A 10 '<table class="footer">' target/site/jacoco/index.html || true
+          grep -Eo 'instruction-covered="[^"]+" instruction-missed="[^"]+"' target/site/jacoco/jacoco.xml || true
 
       - name: Create Pull Request to develop
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           base: develop
-          title: "Auto PR: Sync changes to develop"
-          body: "Este PR foi criado automaticamente após push em outra branch, com testes unitários passando."
-          draft: false
-          branch: pr-to-develop
+          branch: ${{ github.ref_name }}
+          title: 'Sync changes from ${{ github.ref_name }} to develop'
+          body: 'Automatic PR to keep develop branch updated.'
