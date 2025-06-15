@@ -27,3 +27,33 @@ variable "subnet_ids" {
   type        = list(string)
   default = ["subnet-001b9943999c46f1e","subnet-064cd7760ca940201"]
 }
+
+variable "health_check_path" {
+  description = "Caminho HTTP para o health check"
+  type        = string
+  default     = "/actuator/health"
+}
+
+variable "health_check_interval" {
+  description = "Intervalo em segundos entre as verificações de health check"
+  type        = number
+  default     = 30
+}
+
+variable "health_check_timeout" {
+  description = "Timeout em segundos para o health check"
+  type        = number
+  default     = 5
+}
+
+variable "health_check_healthy_threshold" {
+  description = "Número de respostas sucessivas para considerar o target saudável"
+  type        = number
+  default     = 2
+}
+
+variable "unhealthy_threshold" {
+  description = "Número de respostas falhas para considerar o target não saudável"
+  type        = number
+  default     = 2
+}
