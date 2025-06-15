@@ -57,3 +57,57 @@ variable "unhealthy_threshold" {
   type        = number
   default     = 4
 }
+
+variable "min_capacity" {
+  description = "Quantidade mínima de tasks no ECS service"
+  type        = number
+  default     = 2
+}
+
+variable "max_capacity" {
+  description = "Quantidade máxima de tasks no ECS service"
+  type        = number
+  default     = 4
+}
+
+variable "cpu_target_value" {
+  description = "Percentual de CPU para acionar o autoscaling (ex: 50.0)"
+  type        = number
+  default     = 75.0
+}
+
+variable "schedule_down_cron" {
+  description = "Cron expression para agendar a escala para baixo (desligar)"
+  type        = string
+  default     = "cron(0 22 * * ? *)"
+}
+
+variable "schedule_down_min_capacity" {
+  description = "Min capacity para escala down"
+  type        = number
+  default     = 0
+}
+
+variable "schedule_down_max_capacity" {
+  description = "Max capacity para escala down"
+  type        = number
+  default     = 0
+}
+
+variable "schedule_up_cron" {
+  description = "Cron expression para agendar a escala para cima (ligar)"
+  type        = string
+  default     = "cron(0 8 * * ? *)"
+}
+
+variable "schedule_up_min_capacity" {
+  description = "Min capacity para escala up"
+  type        = number
+  default     = 2
+}
+
+variable "schedule_up_max_capacity" {
+  description = "Max capacity para escala up"
+  type        = number
+  default     = 4
+}
