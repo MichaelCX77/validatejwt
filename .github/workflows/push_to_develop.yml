@@ -24,7 +24,7 @@ jobs:
 
       - name: Extract coverage from HTML report
         run: |
-          FILE="validatejwt/target/site/jacoco/index.html"
+          FILE="target/site/jacoco/index.html"
           if [ -f "$FILE" ]; then
             # Extrai a linha com "Total" da tabela <tfoot>
             COVERAGE_LINE=$(grep -A 1 '<tfoot>' "$FILE" | grep 'Total')
