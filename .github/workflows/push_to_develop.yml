@@ -1,0 +1,33 @@
+name: Test and Create PR to Develop
+
+on:
+  push:
+    branches-ignore:
+      - develop  # evita loop criando PR para develop se já estiver na develop
+
+jobs:
+  test-and-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Run Unit Tests
+        run: mvn test
+
+      - name: Create Pull Request to develop
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: develop
+          title: "Auto PR: Sync changes to develop"
+          body: "Este PR foi criado automaticamente após push em outra branch, com testes unitários passando."
+          draft: false
+          branch: pr-to-develop
