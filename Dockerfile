@@ -16,7 +16,7 @@ FROM eclipse-temurin:17-jre
 WORKDIR /app
 
 # Copia o .jar gerado
-COPY --from=builder /app/target/*.jar app.jar
+COPY --from=builder /app/target/*.jar validatejwt.jar
 
 # Expõe a porta 8080 (usada pelo ECS para health checks, por exemplo)
 EXPOSE 8080
