@@ -31,7 +31,7 @@ variable "desired_count" {
 variable "container_port" {
   description = "Porta exposta pelo container"
   type        = number
-  default     = 80
+  default     = 8080
 }
 
 variable "vpc_id" {
@@ -58,7 +58,6 @@ variable "security_group_id" {
 
 variable "cluster_id" {
   type = string
-  default = ""
 }
 
 variable "target_group_arn" {
