@@ -26,10 +26,12 @@ jobs:
         run: |
           FILE="target/site/jacoco/index.html"
           if [ -f "$FILE" ]; then
-            # Extrai a linha com "Total" da tabela <tfoot>
+            # Pega a linha do <tfoot> que contém "Total"
             COVERAGE_LINE=$(grep -A 1 '<tfoot>' "$FILE" | grep 'Total')
-            # Extrai o valor de cobertura de instruções, que está na terceira <td> (índice 2)
-            COVERAGE=$(echo "$COVERAGE_LINE" | sed -E 's|.*<td[^>]*>([0-9]+%)</td>.*|\1|')
+            # Extrai o valor da primeira célula <td> com classe ctr2 (que é a cobertura correta)
+            COVERAGE=$(echo "$COVERAGE_LINE" | grep -oP '(?<=<td class="ctr2">)[0-9]{1,3}%')
+            # Pega só o primeiro resultado (caso tenha mais de um)
+            COVERAGE=$(echo "$COVERAGE" | head -n 1)
             echo "✅ Cobertura de instruções: $COVERAGE"
           else
             echo "❌ Arquivo de cobertura não encontrado: $FILE"
