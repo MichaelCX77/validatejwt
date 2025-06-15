@@ -26,10 +26,16 @@ jobs:
         run: |
           FILE="target/site/jacoco/index.html"
           if [ -f "$FILE" ]; then
-            LINE=$(grep '<tfoot>' -A 2 "$FILE" | grep 'Total')
-            # A quinta <td> (índice 4) corresponde à coluna "Cov." na linha "Total"
-            COVERAGE=$(echo "$LINE" | sed -E 's|.*<td[^>]*>[^<]*</td><td[^>]*>[^<]*</td><td[^>]*>[^<]*</td><td[^>]*>[^<]*</td><td[^>]*>([0-9]+%)</td>.*|\1|')
-            echo "✅ Cobertura total: $COVERAGE"
+            # Extrai a linha com "Total" da tabela <tfoot>
+            COVERAGE_LINE=$(grep -A 1 '<tfoot>' "$FILE" | grep 'Total')
+            
+            # Extrai todas as colunas <td>
+            COLUMNS=($(echo "$COVERAGE_LINE" | grep -oP '(?<=<td[^>]*>).*?(?=</td>)'))
+
+            INSTRUCTION_COVERAGE=${COLUMNS[2]}
+            BRANCH_COVERAGE=${COLUMNS[4]}
+
+            echo "✅ Cobertura de instruções: $INSTRUCTION_COVERAGE"
           else
             echo "❌ Arquivo de cobertura não encontrado: $FILE"
             exit 1
