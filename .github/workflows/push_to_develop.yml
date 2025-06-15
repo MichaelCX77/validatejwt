@@ -26,9 +26,12 @@ jobs:
         run: |
           FILE="target/site/jacoco/index.html"
           if [ -f "$FILE" ]; then
-            LINE=$(grep '<tfoot>' -A 2 "$FILE" | grep 'Total')
-            # A terceira <td> (índice 2) corresponde à coluna "Cov." na linha "Total"
-            COVERAGE=$(echo "$LINE" | sed -E 's|.*<td[^>]*>[^<]*</td><td[^>]*>[^<]*</td><td[^>]*>([0-9]+%)</td>.*|\1|')
+            # Extrai a linha do <tfoot> com "Total"
+            LINE=$(grep -oP '(?s)(?<=<tfoot>).*?(?=</tfoot>)' "$FILE" | grep '<td>Total</td>')
+            # Extrai o conteúdo da terceira <td> (índice 2) que contém a cobertura (ex: 93%)
+            COVERAGE=$(echo "$LINE" | grep -oP '(?<=<td[^>]*>)[0-9]{1,3}%')
+            # Pega apenas o terceiro valor encontrado (a terceira td)
+            COVERAGE=$(echo "$COVERAGE" | sed -n 3p)
             echo "✅ Cobertura total: $COVERAGE"
           else
             echo "❌ Arquivo de cobertura não encontrado: $FILE"
