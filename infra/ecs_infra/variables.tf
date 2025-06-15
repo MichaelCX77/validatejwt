@@ -55,5 +55,5 @@ variable "health_check_healthy_threshold" {
 variable "unhealthy_threshold" {
   description = "Número de respostas falhas para considerar o target não saudável"
   type        = number
-  default     = 2
+  default     = 4
 }
