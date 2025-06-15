@@ -13,7 +13,7 @@ variable "project_name" {
 variable "container_port" {
   description = "Porta exposta pelo container"
   type        = number
-  default     = 80
+  default     = 8080
 }
 
 variable "vpc_id" {
