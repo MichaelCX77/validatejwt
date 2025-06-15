@@ -12,4 +12,5 @@ module "ecs_app" {
   target_group_arn  = var.target_group_arn
   security_group_id = var.security_group_id
   image             = var.image
+  execution_role_arn= var.execution_role_arn
 }

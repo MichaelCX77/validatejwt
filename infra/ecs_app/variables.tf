@@ -69,3 +69,9 @@ variable "target_group_arn" {
 variable "image" {
   type    = string
 }
+
+# Role ARN
+variable "execution_role_arn" {
+  type    = string
+  default = "arn:aws:iam::435769559418:role/ECSTaskExecutionRole"
+}
