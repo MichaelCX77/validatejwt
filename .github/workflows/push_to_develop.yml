@@ -1,12 +1,12 @@
-name: Run Unit Tests and Coverage, Auto PR to develop
+name: Run Tests and Create PR
 
 on:
   push:
     branches:
-      - '**'   # Qualquer branch
+      - '**'  # Qualquer branch
 
 jobs:
-  test-and-coverage:
+  test-and-report:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,37 +19,39 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Run tests and generate coverage report
-        run: |
-          mvn clean test jacoco:report
+      - name: Run tests and generate Jacoco report
+        run: mvn clean test jacoco:report
 
-      - name: Show coverage summary (from jacoco.xml)
+      - name: Extract coverage from HTML report
         run: |
-          COVERAGE_XML="validatejwt/target/site/jacoco/jacoco.xml"
-          if [ -f "$COVERAGE_XML" ]; then
-            echo "Coverage summary from jacoco.xml:"
-            # Simples extração das linhas com cobertura usando xmllint e grep
-            xmllint --xpath "//counter[@type='INSTRUCTION']" $COVERAGE_XML | \
-              sed 's/></>\n</g' | grep -E 'missed|covered|covered="([0-9]+)"' || echo "Coverage data not found"
+          FILE="validatejwt/target/site/jacoco/index.html"
+          if [ -f "$FILE" ]; then
+            # Extrai a linha com "Total" da tabela <tfoot>
+            COVERAGE_LINE=$(grep -A 1 '<tfoot>' "$FILE" | grep 'Total')
+            # Extrai o valor de cobertura de instruções, que está na terceira <td> (índice 2)
+            COVERAGE=$(echo "$COVERAGE_LINE" | sed -E 's|.*<td[^>]*>([0-9]+%)</td>.*|\1|')
+            echo "✅ Cobertura de instruções: $COVERAGE"
           else
-            echo "Coverage XML not found!"
+            echo "❌ Arquivo de cobertura não encontrado: $FILE"
+            exit 1
           fi
 
   create-pr-to-develop:
-    needs: test-and-coverage
+    needs: test-and-report
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Create PR to develop branch
+      - name: Create pull request to develop
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           base: develop
           branch: ${{ github.ref_name }}
-          title: "Auto PR: Sync branch '${{ github.ref_name }}' to develop"
+          title: "Auto PR: Merge '${{ github.ref_name }}' into develop"
           body: |
-            Este PR foi criado automaticamente para sincronizar as mudanças da branch `${{ github.ref_name }}` na `develop`.
+            Este PR foi criado automaticamente após o build e testes com Jacoco.
           draft: false
           labels: automated-pr
