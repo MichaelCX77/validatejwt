@@ -51,3 +51,19 @@ variable "capacity_provider" {
   type        = string
   default = "FARGATE_SPOT"
 }
+
+variable "security_group_id" {
+  type = string
+  default = ""
+}
+
+variable "cluster_id" {
+  type = string
+  default = ""
+}
+
+variable "target_group_arn" {
+  description = "ARN do target group do ALB"
+  type = string
+  default = ""
+}
