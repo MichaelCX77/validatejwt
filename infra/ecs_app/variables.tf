@@ -13,19 +13,19 @@ variable "project_name" {
 variable "cpu" {
   description = "Quantidade de CPU para a task"
   type        = number
-  default     = 256
+  default     = 504
 }
 
 variable "memory" {
   description = "Quantidade de memória para a task"
   type        = number
-  default     = 512
+  default     = 1024
 }
 
 variable "desired_count" {
   description = "Número de instâncias da task"
   type        = number
-  default     = 1
+  default     = 2
 }
 
 variable "container_port" {

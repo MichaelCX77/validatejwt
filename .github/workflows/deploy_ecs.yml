@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-package:
+  global-provioner:
     uses: MichaelCX77/infra-base/.github/workflows/deploy.yml@develop
     with:
       project_name: ${{ github.repository }}
