@@ -11,4 +11,5 @@ module "ecs_app" {
   cluster_id        = var.cluster_id
   target_group_arn  = var.target_group_arn
   security_group_id = var.security_group_id
+  image             = var.image
 }
