@@ -24,6 +24,7 @@ jobs:
 
       - name: Extract coverage from HTML report
         run: |
+          MIN_COVERAGE=80
           FILE="target/site/jacoco/index.html"
           if [ -f "$FILE" ]; then
             # Pega a linha do <tfoot> que contém "Total"
@@ -32,7 +33,15 @@ jobs:
             COVERAGE=$(echo "$COVERAGE_LINE" | grep -oP '(?<=<td class="ctr2">)[0-9]{1,3}%')
             # Pega só o primeiro resultado (caso tenha mais de um)
             COVERAGE=$(echo "$COVERAGE" | head -n 1)
-            echo "✅ Cobertura de instruções: $COVERAGE"
+            COVERAGE_NUMBER=${COVERAGE%\%}  # remove o símbolo %
+            echo "⚙️ Coverage mínimo exigido: $MIN_COVERAGE%"
+            echo "✅ Cobertura de instruções atual: $COVERAGE"
+            if [ "$COVERAGE_NUMBER" -ge "$MIN_COVERAGE" ]; then
+              echo "✅ Cobertura está acima do mínimo requerido."
+            else
+              echo "❌ Cobertura abaixo do mínimo requerido!"
+              exit 1
+            fi
           else
             echo "❌ Arquivo de cobertura não encontrado: $FILE"
             exit 1
