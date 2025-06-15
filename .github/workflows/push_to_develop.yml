@@ -3,7 +3,7 @@ name: Test and Create PR to Develop
 on:
   push:
     branches-ignore:
-      - develop  # evita loop criando PR para develop se já estiver na develop
+      - develop
 
 jobs:
   test-and-pr:
@@ -19,8 +19,12 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Run Unit Tests
-        run: mvn test
+      - name: Run Unit Tests and Generate Coverage Report
+        run: |
+          mvn clean test jacoco:report
+          echo "### Coverage Summary ###"
+          # Extrai as linhas do relatório HTML gerado para resumo (exemplo simples)
+          grep -A 10 '<table class="footer">' target/site/jacoco/index.html || true
 
       - name: Create Pull Request to develop
         uses: peter-evans/create-pull-request@v5
