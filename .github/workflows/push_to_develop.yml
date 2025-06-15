@@ -9,11 +9,18 @@ jobs:
   test-and-report:
     runs-on: ubuntu-latest
 
+    outputs:
+      branch_name: ${{ steps.vars.outputs.branch_name }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Histórico completo
+
+      - name: Set branch name
+        id: vars
+        run: echo "branch_name=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -54,15 +61,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set current branch name
-        id: vars
-        run: |
-          echo "branch_name=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
-
       - name: Checkout current branch
         uses: actions/checkout@v3
         with:
-          ref: ${{ steps.vars.outputs.branch_name }}
+          ref: ${{ needs.test-and-report.outputs.branch_name }}
           fetch-depth: 0
 
       - name: Create pull request to develop
@@ -70,8 +72,8 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           base: develop
-          branch: ${{ steps.vars.outputs.branch_name }}
-          title: "Auto PR: Merge '${{ steps.vars.outputs.branch_name }}' into develop"
+          branch: ${{ needs.test-and-report.outputs.branch_name }}
+          title: "Auto PR: Merge '${{ needs.test-and-report.outputs.branch_name }}' into develop"
           body: |
             Este PR foi criado automaticamente após o build e testes com Jacoco.
           draft: false
