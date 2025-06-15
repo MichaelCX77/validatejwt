@@ -9,7 +9,3 @@ output "cluster_id" {
 output "target_group_arn" {
   value = module.ecs_infra.target_group_arn
 }
-
-output "ecr_repository_url" {
-  value = module.ecs_infra.ecr_repository_url
-}

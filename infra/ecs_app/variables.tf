@@ -54,7 +54,6 @@ variable "capacity_provider" {
 
 variable "security_group_id" {
   type = string
-  default = ""
 }
 
 variable "cluster_id" {
@@ -65,5 +64,8 @@ variable "cluster_id" {
 variable "target_group_arn" {
   description = "ARN do target group do ALB"
   type = string
-  default = ""
+}
+
+variable "image" {
+  type    = string
 }
