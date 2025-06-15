@@ -56,7 +56,8 @@ jobs:
     steps:
       - name: Set current branch name
         id: vars
-        run: echo "branch_name=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+        run: |
+          echo "branch_name=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
 
       - name: Checkout current branch
         uses: actions/checkout@v3
