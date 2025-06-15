@@ -1,12 +1,12 @@
-name: Run Unit Tests and Coverage + PR to Develop
+name: Run Unit Tests and Coverage, Auto PR to develop
 
 on:
   push:
-    branches-ignore:
-      - develop
+    branches:
+      - '**'   # Qualquer branch
 
 jobs:
-  test-and-pr:
+  test-and-coverage:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,17 +19,37 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Run Unit Tests and Generate Coverage Report
+      - name: Run tests and generate coverage report
         run: |
           mvn clean test jacoco:report
-          echo "### Coverage Summary ###"
-          grep -Eo 'instruction-covered="[^"]+" instruction-missed="[^"]+"' target/site/jacoco/jacoco.xml || true
 
-      - name: Create Pull Request to develop
-        uses: peter-evans/create-pull-request@v4
+      - name: Show coverage summary (from jacoco.xml)
+        run: |
+          COVERAGE_XML="validatejwt/target/site/jacoco/jacoco.xml"
+          if [ -f "$COVERAGE_XML" ]; then
+            echo "Coverage summary from jacoco.xml:"
+            # Simples extração das linhas com cobertura usando xmllint e grep
+            xmllint --xpath "//counter[@type='INSTRUCTION']" $COVERAGE_XML | \
+              sed 's/></>\n</g' | grep -E 'missed|covered|covered="([0-9]+)"' || echo "Coverage data not found"
+          else
+            echo "Coverage XML not found!"
+          fi
+
+  create-pr-to-develop:
+    needs: test-and-coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create PR to develop branch
+        uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           base: develop
           branch: ${{ github.ref_name }}
-          title: 'Sync changes from ${{ github.ref_name }} to develop'
-          body: 'Automatic PR to keep develop branch updated.'
+          title: "Auto PR: Sync branch '${{ github.ref_name }}' to develop"
+          body: |
+            Este PR foi criado automaticamente para sincronizar as mudanças da branch `${{ github.ref_name }}` na `develop`.
+          draft: false
+          labels: automated-pr
