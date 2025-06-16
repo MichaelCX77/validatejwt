@@ -34,12 +34,6 @@ variable "container_port" {
   default     = 8080
 }
 
-variable "vpc_id" {
-  description = "ID da VPC"
-  type        = string
-  default = "vpc-095a2552dec82c1b2"
-}
-
 variable "subnet_ids" {
   description = "Lista de subnets públicas para Load Balancer e ECS"
   type        = list(string)

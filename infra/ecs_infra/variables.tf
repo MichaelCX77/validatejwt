@@ -79,7 +79,7 @@ variable "cpu_target_value" {
 variable "schedule_down_cron" {
   description = "Cron expression para agendar a escala para baixo (desligar)"
   type        = string
-  default     = "cron(0 22 * * ? *)"
+  default     = "cron(0 21 * * ? *)"
 }
 
 variable "schedule_down_min_capacity" {
@@ -97,7 +97,7 @@ variable "schedule_down_max_capacity" {
 variable "schedule_up_cron" {
   description = "Cron expression para agendar a escala para cima (ligar)"
   type        = string
-  default     = "cron(0 8 * * ? *)"
+  default     = "cron(0 10 * * ? *)"
 }
 
 variable "schedule_up_min_capacity" {
