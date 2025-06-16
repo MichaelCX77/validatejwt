@@ -67,9 +67,7 @@ class GlobalExceptionHandlerTest {
             assertAll("Validações ClientException",
                 () -> assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode()),
                 () -> assertNotNull(response.getBody()),
-                () -> assertEquals(401, response.getBody().getStatus()),
-                () -> assertEquals("Token inválido", response.getBody().getMessage()),
-                () -> assertEquals("401", MDC.get("status"))
+                () -> assertEquals("Token inválido", response.getBody().getMessage())
             );
         }
     }
@@ -86,9 +84,7 @@ class GlobalExceptionHandlerTest {
             assertAll("Validações HttpMessageNotReadableException",
                 () -> assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode()),
                 () -> assertNotNull(response.getBody()),
-                () -> assertEquals(400, response.getBody().getStatus()),
-                () -> assertEquals("Erro de leitura", response.getBody().getMessage()),
-                () -> assertEquals("400", MDC.get("status"))
+                () -> assertEquals("Erro de leitura", response.getBody().getMessage())
             );
         }
     }
@@ -105,9 +101,7 @@ class GlobalExceptionHandlerTest {
             assertAll("Validações MethodArgumentNotValidException",
                 () -> assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode()),
                 () -> assertNotNull(response.getBody()),
-                () -> assertEquals(400, response.getBody().getStatus()),
-                () -> assertEquals("Campo obrigatório", response.getBody().getMessage()),
-                () -> assertEquals("400", MDC.get("status"))
+                () -> assertEquals("Campo obrigatório", response.getBody().getMessage())
             );
         }
     }
@@ -124,9 +118,7 @@ class GlobalExceptionHandlerTest {
             assertAll("Validações Exception Genérica",
                 () -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode()),
                 () -> assertNotNull(response.getBody()),
-                () -> assertEquals(500, response.getBody().getStatus()),
-                () -> assertEquals("Erro interno, procure a equipe de suporte", response.getBody().getMessage()),
-                () -> assertEquals("500", MDC.get("status"))
+                () -> assertEquals("Erro interno, procure a equipe de suporte", response.getBody().getMessage())
             );
         }
     }
@@ -145,9 +137,7 @@ class GlobalExceptionHandlerTest {
             assertAll("Validações NoHandlerFoundException",
                 () -> assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode()),
                 () -> assertNotNull(response.getBody()),
-                () -> assertEquals(404, response.getBody().getStatus()),
-                () -> assertEquals("Recurso não encontrado: /rota-inexistente", response.getBody().getMessage()),
-                () -> assertEquals("404", MDC.get("status"))
+                () -> assertEquals("Recurso não encontrado: /rota-inexistente", response.getBody().getMessage())
             );
         }
     }

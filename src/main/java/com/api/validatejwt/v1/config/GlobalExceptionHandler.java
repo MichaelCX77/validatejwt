@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
         int status = ex.getHttpStatus().value();
         MDC.put("status", String.valueOf(status));
         log.warn(ex.getMessage());
-        ErrorResponse error = new ErrorResponse(status, ex.getMessage());
+        ErrorResponse error = new ErrorResponse(ex.getMessage());
         return ResponseEntity.status(ex.getHttpStatus()).body(error);
     }
 
@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
         String message = "Recurso não encontrado: " + ex.getRequestURL();
         log.warn(message);
 
-        ErrorResponse error = new ErrorResponse(status, message);
+        ErrorResponse error = new ErrorResponse(message);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
     
@@ -66,7 +66,7 @@ public class GlobalExceptionHandler {
         int status = HttpStatus.BAD_REQUEST.value();
         MDC.put("status", String.valueOf(status));
         log.warn("Falha ao interpretar corpo da requisição: {}", ex.getMessage());
-        ErrorResponse error = new ErrorResponse(status, ex.getMessage());
+        ErrorResponse error = new ErrorResponse(ex.getMessage());
         return ResponseEntity.badRequest().body(error);
     }
 
@@ -90,7 +90,7 @@ public class GlobalExceptionHandler {
         String combinedMessage = String.join("; ", messages);
         log.warn("Erro de validação nos campos da requisição: {}", combinedMessage);
 
-        ErrorResponse error = new ErrorResponse(status, combinedMessage);
+        ErrorResponse error = new ErrorResponse(combinedMessage);
         return ResponseEntity.badRequest().body(error);
     }
 
@@ -108,7 +108,7 @@ public class GlobalExceptionHandler {
 
         log.error("Falha inesperada no servidor. Traceback registrado.", ex);
 
-        ErrorResponse error = new ErrorResponse(status, GENERIC_ERROR_MSG);
+        ErrorResponse error = new ErrorResponse(GENERIC_ERROR_MSG);
         return ResponseEntity.status(status).body(error);
     }
 }
