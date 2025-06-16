@@ -2,8 +2,10 @@ name: Run Tests and Create PR
 
 on:
   push:
-    branches:
-      - '**'  # Qualquer branch
+    branches-ignore:
+      - main
+      - develop
+    # executa em todas as outras branches
 
 jobs:
   test-and-report:
@@ -16,7 +18,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Histórico completo
+          fetch-depth: 0  # histórico completo
 
       - name: Set branch name
         id: vars
@@ -61,20 +63,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout current branch
+      - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          ref: ${{ needs.test-and-report.outputs.branch_name }}
           fetch-depth: 0
 
-      - name: Create pull request to develop
+      - name: Create pull request to develop from temp branch
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           base: develop
-          branch: ${{ needs.test-and-report.outputs.branch_name }}
+          # branch temporária para evitar alterar branch original
+          branch: ${{ needs.test-and-report.outputs.branch_name }}-ci-pr
           title: "Auto PR: Merge '${{ needs.test-and-report.outputs.branch_name }}' into develop"
-          body: |
-            Este PR foi criado automaticamente após o build e testes com Jacoco.
+          body: Este PR foi criado automaticamente após a execução dos testes.
           draft: false
           labels: automated-pr
+          delete-branch: true
