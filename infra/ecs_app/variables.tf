@@ -13,7 +13,7 @@ variable "project_name" {
 variable "cpu" {
   description = "Quantidade de CPU para a task"
   type        = number
-  default     = 504
+  default     = 512
 }
 
 variable "memory" {
