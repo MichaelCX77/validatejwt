@@ -1,5 +1,5 @@
 module "ecs_infra" {
-  source         = "git::https://github.com/MichaelCX77/infra-base.git//ecs_infra?ref=develop"
+  source         = "git::https://github.com/MichaelCX77/infra-base.git//ecs_infra?ref=v1.0.0"
   aws_region     = var.aws_region
   project_name   = var.project_name
   container_port = var.container_port
@@ -21,7 +21,7 @@ module "ecs_infra" {
   schedule_down_min_capacity = var.schedule_down_min_capacity
   schedule_down_max_capacity = var.schedule_down_max_capacity
 
-  schedule_up_cron           = var.schedule_up_cron
-  schedule_up_min_capacity   = var.schedule_up_min_capacity
-  schedule_up_max_capacity   = var.schedule_up_max_capacity
+  schedule_up_cron         = var.schedule_up_cron
+  schedule_up_min_capacity = var.schedule_up_min_capacity
+  schedule_up_max_capacity = var.schedule_up_max_capacity
 }
