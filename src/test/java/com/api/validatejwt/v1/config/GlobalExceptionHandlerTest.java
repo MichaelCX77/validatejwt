@@ -21,6 +21,7 @@ import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import com.api.validatejwt.v1.exception.ClientException;
 import com.api.validatejwt.v1.util.ErrorResponse;
@@ -30,7 +31,6 @@ class GlobalExceptionHandlerTest {
 
     private GlobalExceptionHandler handler;
 
-    // Exceções reutilizadas em testes
     private ClientException clientException;
     private HttpMessageNotReadableException httpMessageNotReadableException;
     private MethodArgumentNotValidException methodArgumentNotValidException;
@@ -127,6 +127,27 @@ class GlobalExceptionHandlerTest {
                 () -> assertEquals(500, response.getBody().getStatus()),
                 () -> assertEquals("Erro interno, procure a equipe de suporte", response.getBody().getMessage()),
                 () -> assertEquals("500", MDC.get("status"))
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("handleNoHandlerFoundException")
+    class HandleNoHandlerFoundException {
+
+        @Test
+        @DisplayName("Deve tratar NoHandlerFoundException e retornar status 404 com mensagem apropriada")
+        void deveTratarNoHandlerFoundException() {
+            NoHandlerFoundException ex = new NoHandlerFoundException("GET", "/rota-inexistente", null);
+
+            ResponseEntity<ErrorResponse> response = handler.handleNoHandlerFoundException(ex);
+
+            assertAll("Validações NoHandlerFoundException",
+                () -> assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode()),
+                () -> assertNotNull(response.getBody()),
+                () -> assertEquals(404, response.getBody().getStatus()),
+                () -> assertEquals("Recurso não encontrado: /rota-inexistente", response.getBody().getMessage()),
+                () -> assertEquals("404", MDC.get("status"))
             );
         }
     }
