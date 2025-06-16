@@ -6,7 +6,6 @@ module "ecs_app" {
   memory             = var.memory
   container_port     = var.container_port
   desired_count      = var.desired_count
-  vpc_id             = var.vpc_id
   subnet_ids         = var.subnet_ids
   capacity_provider  = var.capacity_provider
   cluster_id         = var.cluster_id
