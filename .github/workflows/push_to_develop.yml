@@ -58,7 +58,6 @@ jobs:
             exit 1
           fi
 
-jobs:
   create-pr:
     runs-on: ubuntu-latest
     steps:
@@ -78,6 +77,6 @@ jobs:
           }} para develop"
           body: "Este PR foi criado automaticamente após o push para a branch ${{
             github.ref_name
-          }}."
+          }}."  
           draft: false
           labels: automated-pr
