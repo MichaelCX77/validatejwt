@@ -2,6 +2,8 @@
 
 Projeto para validação de tokens JWT
 
+Essa API está hospedada na aws e você pode testa-la em conjunto com a collection presente no projeto: [validatejwtapi-aws](http://validatejwt-pycyjv-1061536693.sa-east-1.elb.amazonaws.com/actuator/health)
+
 ---
 
 ## Índice
