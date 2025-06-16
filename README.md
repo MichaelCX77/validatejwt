@@ -70,7 +70,8 @@ A documentação completa da API está disponível em:
 │   └── images                          # Imagens utilizadas na documentação
 ├── docs
 │   ├── output_log_examples             # Exemplos reais de logs gerados pela aplicação
-│   └── Insomnia_2025-06-08.yaml        # Coleção de requests para Insomnia
+│   └── collections
+│       └──output_log_examplesInsomnia_*.yaml  # Coleções de requests para Insomnia
 ├── pom.xml                             # Arquivo de configuração do Maven
 └── README.md                           # (Este arquivo)
 ```
