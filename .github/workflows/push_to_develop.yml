@@ -57,26 +57,3 @@ jobs:
             echo "❌ Arquivo de cobertura não encontrado: $FILE"
             exit 1
           fi
-
-  create-pr:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Fazer checkout do código
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 
-
-      - name: Criar Pull Request para a branch develop
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          base: develop
-          branch: ${{ github.ref_name }} 
-          title: "PR automático: ${{
-            github.ref_name
-          }} para develop"
-          body: "Este PR foi criado automaticamente após o push para a branch ${{
-            github.ref_name
-          }}."  
-          draft: false
-          labels: automated-pr
