@@ -1,17 +1,28 @@
 name: CI 🚀
 
+# ────────────────────────────────
+# 🔁 EVENTOS QUE DISPARAM O WORKFLOW
+# ────────────────────────────────
 on:
   push:
-    branches: [develop]
-  workflow_dispatch:
+    branches: [develop]  # Executa o workflow quando houver push para a branch develop
+  workflow_dispatch:      # Permite execução manual via interface do GitHub Actions
 
+# ────────────────────────────────
+# 🧱 JOB PRINCIPAL: Provisionamento global (Infraestrutura + Deploy)
+# ────────────────────────────────
 jobs:
   global-provioner:
+    # ♻ Reutilização de workflow externo armazenado no repositório 'infra-base'
     uses: MichaelCX77/infra-base/.github/workflows/deploy.yml@develop
+
+    # 📥 INPUTS PARA O WORKFLOW EXTERNO
     with:
-      project_name: ${{ github.repository }}
-      repo: ${{ github.repository }}
-      ref: ${{ github.ref_name }}
+      project_name: ${{ github.repository }}     # Nome completo do repositório (ex: user/repo)
+      repo: ${{ github.repository }}             # Repositório onde está o código a ser implantado
+      ref: ${{ github.ref_name }}                # Nome da branch ou tag que disparou o workflow
+
+    # 🔐 SEGREDOS NECESSÁRIOS PARA ACESSO À AWS
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
