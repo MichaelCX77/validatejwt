@@ -12,12 +12,11 @@ class ErrorResponseTest {
 
     private ErrorResponse errorResponse;
 
-    private final int STATUS_CODE = 400;
     private final String MESSAGE = "Requisição inválida";
 
     @BeforeEach
     void setup() {
-        errorResponse = new ErrorResponse(STATUS_CODE, MESSAGE);
+        errorResponse = new ErrorResponse(MESSAGE);
     }
 
     @Nested
@@ -27,20 +26,16 @@ class ErrorResponseTest {
         @Test
         @DisplayName("Deve inicializar corretamente com valores fornecidos")
         void deveInicializarCorretamente() {
-            assertEquals(STATUS_CODE, errorResponse.getStatus());
             assertEquals(MESSAGE, errorResponse.getMessage());
         }
 
         @Test
         @DisplayName("Deve permitir atualização dos campos via setters")
         void deveAtualizarCamposComSetters() {
-            int novoStatus = 401;
             String novaMensagem = "Não autorizado";
 
-            errorResponse.setStatus(novoStatus);
             errorResponse.setMessage(novaMensagem);
 
-            assertEquals(novoStatus, errorResponse.getStatus());
             assertEquals(novaMensagem, errorResponse.getMessage());
         }
 
@@ -49,14 +44,13 @@ class ErrorResponseTest {
         void deveConterToStringCorreto() {
             String toString = errorResponse.toString();
             assertNotNull(toString);
-            assertTrue(toString.contains(String.valueOf(STATUS_CODE)));
             assertTrue(toString.contains(MESSAGE));
         }
 
         @Test
         @DisplayName("Deve validar igualdade entre dois objetos com os mesmos dados")
         void deveValidarEqualsECodigoHash() {
-            ErrorResponse outroErro = new ErrorResponse(STATUS_CODE, MESSAGE);
+            ErrorResponse outroErro = new ErrorResponse(MESSAGE);
 
             assertEquals(errorResponse, outroErro);
             assertEquals(errorResponse.hashCode(), outroErro.hashCode());

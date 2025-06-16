@@ -21,6 +21,7 @@ import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import com.api.validatejwt.v1.exception.ClientException;
 import com.api.validatejwt.v1.util.ErrorResponse;
@@ -30,7 +31,6 @@ class GlobalExceptionHandlerTest {
 
     private GlobalExceptionHandler handler;
 
-    // Exceções reutilizadas em testes
     private ClientException clientException;
     private HttpMessageNotReadableException httpMessageNotReadableException;
     private MethodArgumentNotValidException methodArgumentNotValidException;
@@ -67,9 +67,7 @@ class GlobalExceptionHandlerTest {
             assertAll("Validações ClientException",
                 () -> assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode()),
                 () -> assertNotNull(response.getBody()),
-                () -> assertEquals(401, response.getBody().getStatus()),
-                () -> assertEquals("Token inválido", response.getBody().getMessage()),
-                () -> assertEquals("401", MDC.get("status"))
+                () -> assertEquals("Token inválido", response.getBody().getMessage())
             );
         }
     }
@@ -86,9 +84,7 @@ class GlobalExceptionHandlerTest {
             assertAll("Validações HttpMessageNotReadableException",
                 () -> assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode()),
                 () -> assertNotNull(response.getBody()),
-                () -> assertEquals(400, response.getBody().getStatus()),
-                () -> assertEquals("Erro de leitura", response.getBody().getMessage()),
-                () -> assertEquals("400", MDC.get("status"))
+                () -> assertEquals("Erro de leitura", response.getBody().getMessage())
             );
         }
     }
@@ -105,9 +101,7 @@ class GlobalExceptionHandlerTest {
             assertAll("Validações MethodArgumentNotValidException",
                 () -> assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode()),
                 () -> assertNotNull(response.getBody()),
-                () -> assertEquals(400, response.getBody().getStatus()),
-                () -> assertEquals("Campo obrigatório", response.getBody().getMessage()),
-                () -> assertEquals("400", MDC.get("status"))
+                () -> assertEquals("Campo obrigatório", response.getBody().getMessage())
             );
         }
     }
@@ -124,9 +118,26 @@ class GlobalExceptionHandlerTest {
             assertAll("Validações Exception Genérica",
                 () -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode()),
                 () -> assertNotNull(response.getBody()),
-                () -> assertEquals(500, response.getBody().getStatus()),
-                () -> assertEquals("Erro interno, procure a equipe de suporte", response.getBody().getMessage()),
-                () -> assertEquals("500", MDC.get("status"))
+                () -> assertEquals("Erro interno, procure a equipe de suporte", response.getBody().getMessage())
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("handleNoHandlerFoundException")
+    class HandleNoHandlerFoundException {
+
+        @Test
+        @DisplayName("Deve tratar NoHandlerFoundException e retornar status 404 com mensagem apropriada")
+        void deveTratarNoHandlerFoundException() {
+            NoHandlerFoundException ex = new NoHandlerFoundException("GET", "/rota-inexistente", null);
+
+            ResponseEntity<ErrorResponse> response = handler.handleNoHandlerFoundException(ex);
+
+            assertAll("Validações NoHandlerFoundException",
+                () -> assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode()),
+                () -> assertNotNull(response.getBody()),
+                () -> assertEquals("Recurso não encontrado: /rota-inexistente", response.getBody().getMessage())
             );
         }
     }

@@ -1,6 +1,5 @@
 package com.api.validatejwt.v1.controller;
 
-import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,7 +38,6 @@ public class JwtController {
 		log.info("Recebida requisição para validação de JWT");
 
 		JwtDTO jwtDTO = jwtService.validate(jwt);
-		MDC.put("status", "200");
 		log.info("Validação de JWT concluída com sucesso");
 		return ResponseEntity.ok(jwtDTO);
 
