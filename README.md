@@ -15,6 +15,8 @@ Projeto para validação de tokens JWT
 - [Configuração e Execução](#configuração-e-execução)
 - [Features Disponíveis](#features-disponíveis)
 - [Exemplos de Logs da Aplicação](#exemplos-de-logs-da-aplicação)
+- [Infraestrutura como Código (Terraform)](#infraestrutura-como-código-terraform)
+- [Integração e Automação via GitHub Actions](#integração-e-automação-via-github-actions)
 - [Informações Adicionais](#informações-adicionais)
 - [Referências e Fontes Externas](#referências-e-fontes-externas)
 
@@ -71,7 +73,17 @@ A documentação completa da API está disponível em:
 ├── docs
 │   ├── output_log_examples             # Exemplos reais de logs gerados pela aplicação
 │   └── collections
-│       └──output_log_examplesInsomnia_*.yaml  # Coleções de requests para Insomnia
+│       └── output_log_examplesInsomnia_*.yaml  # Coleções de requests para Insomnia
+├── infra
+│   ├── ecs_app
+│   │   ├── backend.tf
+│   │   ├── main.tf
+│   │   └── variables.tf
+│   └── ecs_infra
+│       ├── backend.tf
+│       ├── main.tf
+│       ├── outputs.tf
+│       └── variables.tf
 ├── pom.xml                             # Arquivo de configuração do Maven
 └── README.md                           # (Este arquivo)
 ```
@@ -89,22 +101,25 @@ A documentação completa da API está disponível em:
 - **resources/application.properties**: Configura propriedades da aplicação, como porta, logs, etc.
 - **resources/logback-spring.xml**: Configuração de logging estruturado (Logback e Logstash).
 - **docs/output_log_examples**: Exemplos reais de logs de sucesso/erro.
-- **docs/Insomnia_2025-06-08.yaml**: Exemplos prontos para testar a API com Insomnia.
+- **docs/Insomnia_*.yaml**: Exemplos prontos para testar a API com Insomnia.
+- **infra/**: Infraestrutura como código (Terraform), pronta para deploy na AWS via ECS Fargate.
 
 ---
 
 ## Descrição das Bibliotecas
 
-O projeto utiliza as seguintes dependências (definidas em `pom.xml`):
+Principais dependências utilizadas:
 
-- **Spring Boot Starter Web**: Framework para criação de APIs REST.
-- **Spring Boot Starter Validation**: Suporte a validações via anotações.
-- **Lombok**: Geração de código boilerplate (getters, setters, etc).
-- **Jakarta Validation API**: Validação de beans.
-- **Logstash Logback Encoder**: Logging estruturado em JSON para integração com ELK stack.
-- **Spring Boot Devtools**: Hot reload para desenvolvimento.
-- **JUnit, Spring Boot Starter Test**: Testes automatizados.
-- **JaCoCo Maven Plugin**: Geração de relatórios de cobertura de código.
+- **spring-boot-starter:** Inicialização rápida do Spring Boot, gerenciamento de contexto e recursos básicos do framework.
+- **spring-boot-starter-web:** Permite criação de APIs REST usando Spring MVC.
+- **spring-boot-starter-actuator:** Exposição de métricas e endpoints de monitoramento de saúde da aplicação.
+- **spring-boot-starter-validation:** Suporte a validações de dados no padrão Bean Validation (JSR-380).
+- **jakarta.validation-api:** API de validação para beans Java, integrada ao Spring.
+- **lombok:** Automatiza geração de métodos comuns (getters, setters, builders etc), reduzindo boilerplate.
+- **logstash-logback-encoder:** Geração de logs estruturados em JSON, facilitando integração com ELK Stack (Elasticsearch, Logstash, Kibana).
+- **spring-boot-devtools:** Hot reload e melhorias no ciclo de desenvolvimento (somente ambiente local).
+- **spring-boot-starter-test:** Ferramentas para testes unitários e de integração, incluindo JUnit, Hamcrest e Mockito.
+- **jacoco-maven-plugin:** Plugin Maven para geração e validação de cobertura de código nos testes (mínimo exigido de 80%).
 
 ---
 
@@ -133,7 +148,7 @@ O projeto utiliza as seguintes dependências (definidas em `pom.xml`):
 
 ---
 
-## Validações Disponíveis
+## Features Disponíveis
 
 ### ✅ Válido  
 - **JWT válido:** Campo jwt contendo 3 claims válidas: `Name`, `Role` e `Seed`.  
@@ -166,6 +181,107 @@ Esses arquivos exemplificam logs de requisições bem-sucedidas, falhas de valid
 
 ---
 
+## Infraestrutura como Código (Terraform)
+
+O projeto já inclui uma estrutura pronta para deploy em nuvem usando **Terraform** e AWS ECS Fargate.  
+A pasta `/infra` contém módulos para provisionamento de infraestrutura e aplicação, **baseados no repositório [@MichaelCX77/infra-base](https://github.com/MichaelCX77/infra-base)**.
+
+### Sobre o repositório de infraestrutura ([infra-base](https://github.com/MichaelCX77/infra-base))
+
+O [infra-base](https://github.com/MichaelCX77/infra-base) é um projeto de infraestrutura reutilizável em Terraform, focado em deployment de APIs no AWS ECS Fargate, combinando baixo custo, escalabilidade e facilidade operacional.  
+Ele automatiza todo o provisionamento necessário para aplicações containerizadas, incluindo rede, cluster, balanceador de carga, logs, auto scaling e integração com ECR.
+
+**Principais módulos:**
+- `ecs_infra`: Provisionamento de rede, cluster ECS, ALB, security groups, auto scaling etc.
+- `ecs_app`: Deploy da aplicação/container e ligação com a infraestrutura criada.
+
+**Estrutura típica:**
+```
+/validatejwt/infra
+├── ecs_app/
+│   ├── backend.tf
+│   ├── main.tf
+│   └── variables.tf
+└── ecs_infra/
+    ├── backend.tf
+    ├── main.tf
+    ├── outputs.tf
+    └── variables.tf
+```
+
+### Como funciona
+
+- **State remoto:** O arquivo `backend.tf` utiliza backend S3 para versionamento e colaboração segura do estado do Terraform.
+- **Módulos separados:** `ecs_infra` para infraestrutura base e `ecs_app` para o deploy do serviço/container.
+- **Infra as Code:** Permite escalar, destruir e versionar sua infraestrutura com facilidade, de acordo com o padrão definido no [infra-base](https://github.com/MichaelCX77/infra-base).
+
+### Como usar
+
+1. Ajuste as variáveis conforme seu contexto.
+2. Inicialize e aplique cada módulo:
+   ```bash
+   cd infra/ecs_infra
+   terraform init
+   terraform apply
+
+   cd ../ecs_app
+   terraform init
+   terraform apply
+   ```
+3. Os recursos serão provisionados automaticamente na AWS.
+
+> Consulte também a documentação e exemplos no próprio repositório [infra-base](https://github.com/MichaelCX77/infra-base).
+
+---
+
+## Integração e Automação via GitHub Actions
+
+O projeto conta com um pipeline CI/CD robusto, utilizando **GitHub Actions** para automação de testes, build, cobertura, documentação e deploy. Os principais workflows são:
+
+### **deploy_ecs**
+
+- CI/CD para deploy da aplicação no ECS, disparado em push na branch `develop` ou manualmente.
+- Executa:
+  - Provisionamento de infraestrutura via Terraform (reutilizando workflow da base infra).
+  - Build e push da imagem Docker para ECR.
+  - Deploy automatizado no ECS Fargate.
+
+**Como usar:**  
+Push na branch `develop` ou acione manualmente o workflow nas Actions do GitHub.
+
+---
+
+### **deploy_javadoc**
+
+- Gera e publica automaticamente a documentação JavaDoc do projeto no GitHub Pages.
+- Executado a cada push na branch `main`.
+- Utiliza Maven para buildar o Javadoc e [peaceiris/actions-gh-pages](https://github.com/peaceiris/actions-gh-pages) para publicar.
+
+**Como usar:**  
+Push na branch `main` do repositório.
+
+---
+
+### **push_to_develop**
+
+- Executa testes automatizados, gera relatório de cobertura Jacoco e pode ser ajustado para criar PRs para a branch develop.
+- Disparado para todas as branches, exceto `main` e `develop`.
+- Valida se a cobertura mínima foi atingida e apresenta feedback nos logs.
+
+**Como usar:**  
+Push em qualquer branch de feature/fix.
+
+---
+
+### Como funciona a automação
+
+- Cada workflow é disparado de acordo com eventos do GitHub (push, PR, etc).
+- Os jobs são segmentados em etapas: build/teste, geração de cobertura, publicação de documentação e deploy.
+- O state remoto do Terraform garante independência e rastreabilidade dos recursos.
+- A automação cobre todo o ciclo: infra, build, testes, cobertura, documentação e deploy.
+
+---
+
 ## Informações Adicionais
 
 - **Gerar documentação Javadoc**
@@ -173,7 +289,8 @@ Esses arquivos exemplificam logs de requisições bem-sucedidas, falhas de valid
   mvn javadoc:javadoc
   ```
   Os arquivos gerados estarão em `target/site/apidocs`.
-- **Geração automatizada do javadoc automatizada pelo githubactions após o merge na main -> [deploy-javadoc.yml](.github/workflows/deploy-javadoc.yml), é disponibilizada via GithubPages -> [https://michaelcx77.github.io/validatejwt/](https://michaelcx77.github.io/validatejwt/)**
+- **Javadoc é publicado automaticamente pelo GitHub Actions e pode ser acessado em:**  
+  [https://michaelcx77.github.io/validatejwt/](https://michaelcx77.github.io/validatejwt/)
 
 - **Gerar relatório de cobertura de testes**
   ```bash
@@ -192,5 +309,11 @@ Esses arquivos exemplificam logs de requisições bem-sucedidas, falhas de valid
 - [Logback e Logstash Encoder](https://github.com/logstash/logstash-logback-encoder)
 - [JavaDoc para projetos Maven](https://maven.apache.org/plugins/maven-javadoc-plugin/)
 - [JaCoCo - Java Code Coverage](https://www.jacoco.org/jacoco/)
+- [Terraform AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
+- [Deploy ECS Fargate + ALB (AWS Hands-on)](https://aws.amazon.com/getting-started/hands-on/deploy-docker-containers/)
+- [@MichaelCX77/infra-base — Source da Infraestrutura](https://github.com/MichaelCX77/infra-base)
+- [Actions: peaceiris/actions-gh-pages](https://github.com/peaceiris/actions-gh-pages)
 
 ---
+
+Contribuições são bem-vindas! Abra issues ou pull requests com sugestões ou melhorias.
