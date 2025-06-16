@@ -18,4 +18,8 @@ buildNumber.properties
 mvnw*
 .factorypath
 .settings
+.terraform*
 HELP.md
+
+terraform.tfstate
+terraform.tfstate.backup

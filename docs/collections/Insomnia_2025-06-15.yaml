@@ -55,7 +55,7 @@ collection:
             meta:
               id: req_2a3f6dbf0ee64c66a2fa2373b3f81f98
               created: 1749408316123
-              modified: 1749408791357
+              modified: 1749430511337
               isPrivate: false
               description: ""
               sortKey: -1749408260502
@@ -84,16 +84,17 @@ collection:
             meta:
               id: req_3204660900e54fa99876805412b1db6a
               created: 1749408366768
-              modified: 1749408793093
+              modified: 1749430564669
               isPrivate: false
               description: ""
               sortKey: -1749408260477
             method: POST
             body:
-              text: "{\r \t\"jwt\":
-                \"eyJhbGciOiJIUzI1NiJ9.eyJOYW1lIjoiVG9uaW5obyAxMjMiLCJSb2xlIjoi\
-                TWVtYmVyIiwiU2VlZCI6IjE3In0.signature\"\r }"
               mimeType: application/json
+              text: >-
+                {
+                 	"jwt": "eyJhbGciOiJIUzI1NiJ9.eyJOYW1lIjoiVG9uaW5obyAxMjMiLCJSb2xlIjoiTWVtYmVyIiwiU2VlZCI6IjE3In0.signature"
+                 }
             headers:
               - name: Content-Type
                 value: application/json
@@ -112,7 +113,7 @@ collection:
             meta:
               id: req_192be4672ce64bc7a79636f19391565d
               created: 1749408403917
-              modified: 1749408794704
+              modified: 1749430583998
               isPrivate: false
               description: ""
               sortKey: -1749408260464.5
@@ -126,8 +127,10 @@ collection:
             headers:
               - name: Content-Type
                 value: application/json
+                id: pair_62055cd932ca432b8d2b3b6541e64e27
               - name: User-Agent
                 value: insomnia/11.2.0
+                id: pair_2fd90a5f11754197b0d279e64030dec7
             settings:
               renderRequestBody: true
               encodeUrl: true
@@ -141,7 +144,7 @@ collection:
             meta:
               id: req_fff43e4a787a43e6a44d85158c391027
               created: 1749408436932
-              modified: 1749408796207
+              modified: 1749427769739
               isPrivate: false
               description: ""
               sortKey: -1749408260458.25
@@ -198,7 +201,7 @@ collection:
             meta:
               id: req_b2bf672296224bfea3c1eb944428b3e1
               created: 1749408782539
-              modified: 1749408896516
+              modified: 1749419556745
               isPrivate: false
               description: ""
               sortKey: -1749408259752
@@ -335,28 +338,19 @@ collection:
                 send: true
                 store: true
               rebuildPath: true
-      - url: "{{ _.base_path }}/api/v1/jwt"
-        name: POST Validate JWTToken
+      - url: "{{ _.base_path }}/actuator/health"
+        name: Actuator
         meta:
-          id: req_2b6d9f8fcc4544d39787beba015ad5a4
-          created: 1749341231878
-          modified: 1749408275882
+          id: req_a85e4f0a0af94d5db794cc3350308a1c
+          created: 1750008631530
+          modified: 1750015906473
           isPrivate: false
           description: ""
-          sortKey: -1749341231878
-        method: POST
-        body:
-          mimeType: application/json
-          text: >-
-            {
-            	"jwt": "eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiRXh0ZXJuYWwiLCJTZWVkIjoiNzg0MCIsIk5hbWUiOiJUb25pbmhvIEFyYXVqb0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQSJ9.eSIo5pDHuCAjYeHfd5NG7Tg4aatbmJYrW-sCmb3ZWvs"
-            }
+          sortKey: -1750008631530
+        method: GET
         headers:
-          - name: Content-Type
-            value: application/json
           - name: User-Agent
             value: insomnia/11.2.0
-            id: pair_415b4c47e6104e40b4895d9854d77ff1
         settings:
           renderRequestBody: true
           encodeUrl: true
@@ -392,9 +386,11 @@ environments:
       meta:
         id: env_ee39a88cf7974b5a841b6edf7375c1e7
         created: 1749341276052
-        modified: 1749341316056
+        modified: 1750015895356
         isPrivate: false
         sortKey: 1749341276052
+      data:
+        base_path: http://validatejwt-pycyjv-1061536693.sa-east-1.elb.amazonaws.com
     - name: HOM_AWS
       meta:
         id: env_8e45e2a803b04a8283b59a6d8411ba20

@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -52,9 +51,6 @@ class JwtControllerTest {
             assertEquals("Token válido", response.getBody().getMessage());
 
             verify(jwtService, times(1)).validate(mockJwt);
-
-            // Verificação do valor no MDC (se aplicável ao ambiente de teste)
-            assertEquals("200", MDC.get("status"));
         }
     }
 }

@@ -87,13 +87,13 @@ public class JwtService {
     private String extractPayload(String jwtString) {
         String[] parts = jwtString.split("\\.");
         if (parts.length != 3) {
-            throw new ClientException(HttpStatus.OK, JWT_INVALID_MSG);
+            throw new ClientException(HttpStatus.BAD_REQUEST, JWT_INVALID_MSG);
         }
         try {
             return new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
         } catch (IllegalArgumentException e) {
         	
-            throw new ClientException(HttpStatus.OK, JWT_INVALID_MSG);
+            throw new ClientException(HttpStatus.BAD_REQUEST, JWT_INVALID_MSG);
         }
     }
 
@@ -110,9 +110,9 @@ public class JwtService {
         } catch (UnrecognizedPropertyException e) {
             String allowedFields = Arrays.toString(getFieldNames(Claim.class));
             String msg = String.format("Campo inválido no JSON: %s / Campos permitidos: %s", e.getPropertyName(), allowedFields);
-            throw new ClientException(HttpStatus.OK, msg);
+            throw new ClientException(HttpStatus.BAD_REQUEST, msg);
         } catch (JsonParseException e) {
-            throw new ClientException(HttpStatus.OK, JWT_INVALID_MSG);
+            throw new ClientException(HttpStatus.BAD_REQUEST, JWT_INVALID_MSG);
         } catch (Exception e) {
             throw new RuntimeException("Erro desconhecido: procure a equipe de suporte.", e);
         }
@@ -131,7 +131,7 @@ public class JwtService {
                 .map(v -> "Campo '" + v.getPropertyPath() + "' informado nos claims é inválido: " + v.getMessage())
                 .findFirst()
                 .orElse("Erro de validação");
-            throw new ClientException(HttpStatus.OK, msg);
+            throw new ClientException(HttpStatus.BAD_REQUEST, msg);
         }
     }
 
@@ -144,10 +144,10 @@ public class JwtService {
     private void validateName(String name) {
         if (name != null) {
             if (name.matches(".*\\d.*")) {
-                throw new ClientException(HttpStatus.OK, "Claim inválido: 'Name' não pode conter números");
+                throw new ClientException(HttpStatus.BAD_REQUEST, "Claim inválido: 'Name' não pode conter números");
             }
             if (name.length() > 256) {
-                throw new ClientException(HttpStatus.OK, "Claim inválido: 'Name' não pode exceder 256 caracteres");
+                throw new ClientException(HttpStatus.BAD_REQUEST, "Claim inválido: 'Name' não pode exceder 256 caracteres");
             }
         }
     }
@@ -161,7 +161,7 @@ public class JwtService {
     private void validateRole(String role) {
         if (!EnumRole.isValidRole(role)) {
             String msg = "Role inválida: " + role + " / Roles disponíveis: " + EnumRole.availableRoles();
-            throw new ClientException(HttpStatus.OK, msg);
+            throw new ClientException(HttpStatus.BAD_REQUEST, msg);
         }
     }
 
@@ -177,15 +177,15 @@ public class JwtService {
         try {
             long number = Long.parseLong(seedValue);
             if (number < 2) {
-                throw new ClientException(HttpStatus.OK, "Claim inválido: 'Seed' deve ser um número primo");
+                throw new ClientException(HttpStatus.BAD_REQUEST, "Claim inválido: 'Seed' deve ser um número primo");
             }
             for (long i = 2; i <= Math.sqrt(number); i++) {
                 if (number % i == 0) {
-                    throw new ClientException(HttpStatus.OK, "Claim inválido: 'Seed' deve ser um número primo");
+                    throw new ClientException(HttpStatus.BAD_REQUEST, "Claim inválido: 'Seed' deve ser um número primo");
                 }
             }
         } catch (NumberFormatException e) {
-            throw new ClientException(HttpStatus.OK, "Claim inválido: 'Seed' deve ser um número primo");
+            throw new ClientException(HttpStatus.BAD_REQUEST, "Claim inválido: 'Seed' deve ser um número primo");
         }
     }
 

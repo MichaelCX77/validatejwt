@@ -10,6 +10,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import com.api.validatejwt.v1.exception.ClientException;
 import com.api.validatejwt.v1.util.ErrorResponse;
@@ -37,10 +38,22 @@ public class GlobalExceptionHandler {
         int status = ex.getHttpStatus().value();
         MDC.put("status", String.valueOf(status));
         log.warn(ex.getMessage());
-        ErrorResponse error = new ErrorResponse(status, ex.getMessage());
+        ErrorResponse error = new ErrorResponse(ex.getMessage());
         return ResponseEntity.status(ex.getHttpStatus()).body(error);
     }
 
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoHandlerFoundException(NoHandlerFoundException ex) {
+        int status = HttpStatus.NOT_FOUND.value();
+        MDC.put("status", String.valueOf(status));
+        
+        String message = "Recurso não encontrado: " + ex.getRequestURL();
+        log.warn(message);
+
+        ErrorResponse error = new ErrorResponse(message);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+    
     /**
      * Trata exceções relacionadas à desserialização incorreta do JSON da requisição.
      * Isso pode incluir campos inesperados, formatos inválidos ou estrutura malformada.
@@ -53,7 +66,7 @@ public class GlobalExceptionHandler {
         int status = HttpStatus.BAD_REQUEST.value();
         MDC.put("status", String.valueOf(status));
         log.warn("Falha ao interpretar corpo da requisição: {}", ex.getMessage());
-        ErrorResponse error = new ErrorResponse(status, ex.getMessage());
+        ErrorResponse error = new ErrorResponse(ex.getMessage());
         return ResponseEntity.badRequest().body(error);
     }
 
@@ -77,7 +90,7 @@ public class GlobalExceptionHandler {
         String combinedMessage = String.join("; ", messages);
         log.warn("Erro de validação nos campos da requisição: {}", combinedMessage);
 
-        ErrorResponse error = new ErrorResponse(status, combinedMessage);
+        ErrorResponse error = new ErrorResponse(combinedMessage);
         return ResponseEntity.badRequest().body(error);
     }
 
@@ -95,7 +108,7 @@ public class GlobalExceptionHandler {
 
         log.error("Falha inesperada no servidor. Traceback registrado.", ex);
 
-        ErrorResponse error = new ErrorResponse(status, GENERIC_ERROR_MSG);
+        ErrorResponse error = new ErrorResponse(GENERIC_ERROR_MSG);
         return ResponseEntity.status(status).body(error);
     }
 }
