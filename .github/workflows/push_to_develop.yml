@@ -1,38 +1,51 @@
 name: Run Tests and Create PR
 
+# ────────────────────────────────
+# 🔁 EVENTO QUE DISPARA O WORKFLOW
+# ────────────────────────────────
 on:
   push:
     branches-ignore:
-      - main
-      - develop
-    # executa em todas as outras branches
+      - main     # Ignora pushes para main
+      - develop  # Ignora pushes para develop
+    # Executa o workflow em pushes para todas as outras branches
 
+# ────────────────────────────────
+# 🧪 JOB: Executa testes e valida cobertura
+# ────────────────────────────────
 jobs:
   test-and-report:
     runs-on: ubuntu-latest
 
+    # 🔁 Output para outros jobs (se necessário)
     outputs:
       branch_name: ${{ steps.vars.outputs.branch_name }}
 
     steps:
+
+      # 📥 Etapa 1: Checkout do repositório com histórico completo
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # histórico completo
+          fetch-depth: 0  # Necessário para basear PRs corretamente
 
+      # 🏷️ Etapa 2: Extrair nome da branch atual
       - name: Set branch name
         id: vars
         run: echo "branch_name=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
 
+      # ☕ Etapa 3: Configurar JDK 17
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
+      # 🧪 Etapa 4: Executar testes e gerar relatório Jacoco
       - name: Run tests and generate Jacoco report
         run: mvn clean test jacoco:report
 
+      # 📊 Etapa 5: Validar cobertura mínima extraída do HTML gerado pelo Jacoco
       - name: Extract coverage from HTML report
         run: |
           FILE="target/site/jacoco/index.html"

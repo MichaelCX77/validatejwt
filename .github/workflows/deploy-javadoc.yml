@@ -1,29 +1,40 @@
 name: Deploy Javadoc
 
+# ────────────────────────────────
+# 🔁 EVENTOS QUE DISPARAM O WORKFLOW
+# ────────────────────────────────
 on:
   push:
     branches:
-      - main
+      - main  # Executa o workflow somente quando houver push para a branch main
 
+# ────────────────────────────────
+# 📦 JOB ÚNICO: Build e Deploy da Javadoc no GitHub Pages
+# ────────────────────────────────
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Ambiente de execução
 
     steps:
+
+      # 📥 Etapa 1: Checkout do código-fonte
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # ☕ Etapa 2: Instalação do Java 17 (Temurin)
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
+      # 🛠️ Etapa 3: Gerar a documentação Javadoc com Maven
       - name: Build Javadoc
         run: mvn javadoc:javadoc
 
+      # 🚀 Etapa 4: Deploy da Javadoc para o GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target/reports/apidocs
+          github_token: ${{ secrets.GITHUB_TOKEN }}  # Token padrão fornecido pelo GitHub Actions
+          publish_dir: ./target/reports/apidocs      # Diretório onde a Javadoc foi gerada
